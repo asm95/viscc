@@ -9,10 +9,11 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import HelloWorld from '@/components/HelloWorld.vue'; // @ is an alias to /src
 import GEditor from '@/components/GramEditor/GramEditor.vue';
 import LL1Info from '@/components/SimLL1/LL1Info.vue';
 import LL1Sim from '@/components/SimLL1/LL1Sim.vue';
+
+import lang from '../lang/index'
 
 import {Settings as SimSettings} from '@/components/SimLL1/simulator';
 
@@ -28,6 +29,7 @@ export default class Home extends Vue {
   constructor(){
     super();
     this.simSettings = {showSuggestions: true, showLines: true};
+    lang.gLang.setLang(lang.LangCode.ptBR);
   }
 }
 </script>
