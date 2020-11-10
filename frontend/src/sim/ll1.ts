@@ -1,3 +1,5 @@
+import Stack from './base/stack'
+
 export interface Symbl {
     id: number;
     repr: string;
@@ -25,6 +27,7 @@ interface IterParseTableItem {
 }
 
 export type aSet = Map<number, Set<number>>;
+export type LL1ParseTable = Map<number, aSet>;
 
 export class L1Sim {
     tokens: Symbl[];
@@ -32,7 +35,7 @@ export class L1Sim {
     rules: Rule[];
     firstSet: aSet;
     followSet: aSet;
-    parseTable: Map<number, aSet>;
+    parseTable: LL1ParseTable;
     emptySymbl: Symbl;
     startSymbl: Symbl;
     endOfInputSymbol: Symbl;
@@ -244,5 +247,179 @@ export class L1Sim {
         this.ruleByID = new Map<number, Rule>();
         this.endOfInputSymbol = {id: g.maxSymbolID++, repr: '$'};
         this.initSymbols();
+    }
+}
+
+enum cmdType { REPL, MATCH }
+enum itemType { TOKEN, NTERM, NONE }
+
+enum LLParseError {
+    NoError,
+    AcReplErr1, AcReplErr2,
+    AcMatchErr1, AcMatchErr2,
+    SgErr1, SgErr2, SgErr3, SgErr4, SgErr5,
+    InvalidRule
+}
+
+interface LLResponse {
+    hasError: LLParseError;
+    args: any[];
+    value: any | undefined;
+}
+
+interface LLSimInputCommand {
+    symbol: Symbl;
+    type: cmdType;
+}
+
+interface LLSimStackItem {
+    type: itemType;
+    value: Symbl;
+}
+
+type LLSimStack = Stack<LLSimStackItem>;
+
+export class ParseSimulator {
+    pareseTable: LL1ParseTable | undefined;
+    inputStream: Symbl[];
+    inputStreamIndex: number;
+    rules: Map<number, Rule>;
+    stack: LLSimStack;
+    grammar: Grammar;
+    private itemTypeMap: Map<number, itemType>;
+
+    getCurrentToken(): Symbl {
+        return this.inputStream[this.inputStreamIndex];
+    }
+
+    getStackTop(): LLSimStackItem | undefined {
+        return this.stack.getTop();
+    }
+    stackIsEmpty(): boolean {
+        return (this.stack.size() == 0);
+    }
+
+    private makeResponseErr(errType: LLParseError, args: any[]): LLResponse {
+        return {hasError: errType, args: args, value: undefined};
+    }
+    private makeResponseOK(value: any): LLResponse {
+        return {hasError: LLParseError.NoError, args: [], value: value};
+    }
+
+    applyCommand(cmd: LLSimInputCommand){
+        // when user enter a command
+        const stackTop = this.stack.getTop();
+        const curToken = this.getCurrentToken();
+        const mkErr = this.makeResponseErr;
+        const curRule = this.rules.get(cmd.symbol.id || -1);
+
+        if (! stackTop){return;}
+
+        if (cmd.type == cmdType.REPL){
+            // can't use switch case with lexical declarations
+            // . more info: https://eslint.org/docs/rules/no-case-declarations
+            if (stackTop.type != itemType.TOKEN){
+                // attempt to replace rule that doesn't match with top of stack
+                return mkErr(LLParseError.AcReplErr1, [stackTop.value]);
+            }
+            if (! curRule){
+                // attempt to index invalid rule
+                return mkErr(LLParseError.InvalidRule, [cmd.symbol]);
+            }
+            if (stackTop.value.id != curRule.lhs.id){
+                return mkErr(LLParseError.AcReplErr2, [stackTop.value, curRule.lhs]);
+            }
+            // this should be an atomic operation 
+            // . (no calls to "isAccept" method should be done in parallel)
+            const outStackValue = this.stack.popItem();
+            const toPushItems: LLSimStackItem[] = curRule.rhs.reverse()
+                .filter(e => e.id != this.grammar.emptySymbol.id)
+                .map((e): LLSimStackItem => {
+                    return {type: this.itemTypeMap.get(e.id) || itemType.NONE, value: e}
+                });
+            this.stack.pushItem(toPushItems);
+        } else if (cmd.type == cmdType.MATCH){
+            if (stackTop.type != itemType.TOKEN){
+                // attempt to match a token of input stream where the top of stack is non-terminal
+                return mkErr(LLParseError.AcMatchErr1, [curToken, stackTop.value]);
+            }
+            if (stackTop.value.id != curToken.id){
+                // attempt to match a token which is not the same as the top of stack
+                return mkErr(LLParseError.AcMatchErr2, [curToken, stackTop.value]);
+            }
+            this.stack.popItem();
+            // advance on input stream
+            this.inputStreamIndex++;
+        }
+        return mkErr(LLParseError.NoError, []);
+    }
+    getNextCommand (): LLResponse {
+        // based on the parsing table, it will generate a command that
+        // . the user needs to apply next if it's desired to parse the
+        // . string correctly if it it's part of grammar
+        // returns null if no parsing table could be generated
+        // returns a command object otherwise
+        const mkErr = this.makeResponseErr;
+        const mkOK = this.makeResponseOK;
+        if (! this.pareseTable){
+            // there's no parse table
+            return mkErr(LLParseError.SgErr1, []);
+        }
+
+        const stackTop = this.getStackTop();
+        const curToken = this.getCurrentToken();
+        const istrIsComsumed = (this.inputStreamIndex == this.inputStream.length-1);
+        if (! stackTop){
+            // stack is empty: no action can be performed
+            return mkErr(LLParseError.SgErr2, []);
+        }
+        if (stackTop.type == itemType.TOKEN){
+            // only one option here, we must match the string
+            if (istrIsComsumed){
+                // we reached the end of input, so we can't match anything
+                return mkErr(LLParseError.SgErr3, []);
+            }
+            return mkOK({type: cmdType.MATCH, symbol: curToken});
+        } else if (stackTop.type == itemType.NTERM){
+            const rowEntry = this.pareseTable.get(stackTop.value.id);
+            if (!rowEntry){
+                // no entry was found for the given machine state, so we
+                // . can't make any correct suggestions
+                return mkErr(LLParseError.SgErr4, [stackTop.value]);
+            }
+            const ruleEntry = rowEntry.get(curToken.id);
+            if (!ruleEntry){
+                // no entry in the table for symbol and terminal
+                return mkErr(LLParseError.SgErr5, [stackTop.value, curToken]);
+            }
+            const ruleID = ruleEntry.values().next().value;
+            return mkOK({type: cmdType.REPL, symbol: ruleID});
+        }
+
+        // this cannot be reached but compiler complains
+        return mkErr(LLParseError.SgErr1, []);
+    }
+
+    private initSim(g: Grammar){
+        for (const rule of g.rules){
+            this.rules.set(rule.id, rule);
+        }
+        // map item types
+        for (const token of g.tokens){
+            this.itemTypeMap.set(token.id, itemType.TOKEN);
+        }
+        for (const nt of g.nterms){
+            this.itemTypeMap.set(nt.id, itemType.NTERM);
+        }
+    }
+
+    constructor(inputStream: string, g: Grammar){
+        this.inputStream = [];
+        this.inputStreamIndex = 0;
+        this.rules = new Map<number, Rule>();
+        this.stack = new Stack<LLSimStackItem>();
+        this.itemTypeMap = new Map<number, itemType>();
+        this.grammar = g;
+        this.initSim(g);
     }
 }
