@@ -1,7 +1,7 @@
 import enUS from './en_us';
 import ptBR from './pt_br';
 
-import {IUIText, IGEditorText} from './skel';
+import {UITextS, GEditorTextS} from './skel';
 
 enum LangCode {
     enUS = 0,
@@ -10,14 +10,14 @@ enum LangCode {
 
 class LangManager {
     private code: LangCode;
-    public ui_text: IUIText;
-    public geditor_text: IGEditorText;
+    public uiText: UITextS;
+    public EditorText: GEditorTextS;
 
     setLang(code: LangCode){
         switch(code){
             case LangCode.ptBR:
-                this.ui_text = ptBR.UIText;
-                this.geditor_text = ptBR.GEditorText;
+                this.uiText = ptBR.UIText;
+                this.EditorText = ptBR.GEditorText;
                 break;
         }
         this.code = code;
@@ -25,8 +25,8 @@ class LangManager {
 
     constructor(){
         this.code = LangCode.enUS;
-        this.ui_text = enUS.UIText;
-        this.geditor_text = enUS.GEditorText;
+        this.uiText = enUS.UIText;
+        this.EditorText = enUS.GEditorText;
     }
 }
 

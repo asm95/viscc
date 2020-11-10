@@ -272,7 +272,7 @@ interface LLSimInputCommand {
     type: cmdType;
 }
 
-interface LLSimStackItem {
+export interface LLSimStackItem {
     type: itemType;
     value: Symbl;
 }

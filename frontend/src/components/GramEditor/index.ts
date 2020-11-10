@@ -19,7 +19,7 @@ export default class GramEdtior extends Vue {
     terms: Symbl[] = [];
     emptySymbol: Symbl = {id: -1, repr: '~'};
 
-    UIText = lang.gLang.geditor_text;
+    UIText = lang.gLang.EditorText;
 
     private renderListItem(s: Array<any>, i: number){
         return (i < s.length-1) ? s[i].repr + ' ' : s[i].repr;

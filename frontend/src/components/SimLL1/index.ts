@@ -30,7 +30,7 @@ interface ComponentConfig {
     }
 })
 export default class LL1Info extends Vue {
-  UIText = lang.gLang.ui_text;
+  UIText = lang.gLang.uiText;
   firstSet: FsDisplay[] = [];
   followSet: FsDisplay[] = [];
   tokens: Symbl[] = [];
