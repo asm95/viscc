@@ -29,7 +29,11 @@
                     <tr v-for="(nt, i) in nterms" :key="i">
                         <td>{{nt.repr}}</td>
                         <td v-for="(t,j) in tokens" :key="i+j">
-                            <span v-for="(r,k) in renderParseTableEntry(nt.id, t.id)" :key="i+j+k">{{r}} </span>
+                            <div v-for="(itm,k) in [renderParseTableEntry(nt.id, t.id)]" :key="i+j+k">
+                                <div :class="{'ptConflict': (config.showParseTableConflicts && itm.hasConflict)}">
+                                    <span v-for="(r,l) in itm.rules" :key="i+j+k+l">{{r}} </span>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
@@ -46,5 +50,8 @@ export default LL1Sim;
 <style scoped>
     .c {
         font-family: monospace;
+    }
+    .ptConflict {
+        color: red;
     }
 </style>

@@ -11,6 +11,16 @@ interface FsDisplay {
 
 enum SetChoice {First, Follow}
 
+interface ParserTableItem {
+    rules: string[];
+    // if there is more than one rule in a single cell
+    // . means grammar is not LL(1)
+    hasConflict: boolean;
+}
+
+interface ComponentConfig {
+    showParseTableConflicts: boolean;
+}
 
 @Component({
     methods: {
@@ -28,8 +38,8 @@ export default class SimLL1 extends Vue {
   eofSymbol: Symbl = {id: -1, repr:'$'};
   private sim: L1Sim | undefined;
   ptDisplayRules = false;
-
   nullableRules: string[] = [];
+  config: ComponentConfig = {showParseTableConflicts: true};
 
   private setToRepr(s: L1Sim, c: SetChoice, t: Symbl): FsDisplay {
     const fS = c == SetChoice.First ? s.firstSet.get(t.id) : s.followSet.get(t.id); // first(X) or follow(X)
@@ -54,7 +64,7 @@ export default class SimLL1 extends Vue {
       return `${rule.lhs.repr} -> ${terms}`;
   }
 
-  private renderParseTableEntry(ntID: number, tokenID: number): string[]{
+  private renderParseTableEntry(ntID: number, tokenID: number): ParserTableItem {
       const ruleDisplay: string[] = [];
       const s = this.sim;
       if (s){
@@ -65,7 +75,7 @@ export default class SimLL1 extends Vue {
               ruleDisplay.push(displayString);
           });
       }
-      return ruleDisplay;
+      return {rules: ruleDisplay, hasConflict: ruleDisplay.length > 1};
   }
 
   onSetGrammar(g: Grammar){
