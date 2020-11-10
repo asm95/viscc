@@ -29,7 +29,7 @@ interface ComponentConfig {
         }
     }
 })
-export default class SimLL1 extends Vue {
+export default class LL1Info extends Vue {
   UIText = lang.gLang.ui_text;
   firstSet: FsDisplay[] = [];
   followSet: FsDisplay[] = [];

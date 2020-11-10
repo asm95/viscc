@@ -43,8 +43,8 @@
 </template>
 
 <script lang="ts">
-import LL1Sim from './index'
-export default LL1Sim;
+import LL1Info from './index'
+export default LL1Info;
 </script>
 
 <style scoped>
