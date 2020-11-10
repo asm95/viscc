@@ -1,29 +1,7 @@
-<template>
-    <div>
-        <p><b>First Set</b></p>
-        <p v-for="(f,i) in firstSet" :key="i">First of ("<span class="c">{{f.symbol}}</span>") = {
-            <span v-for="(e,j) in f.items" :key="j">{{ renderListItem(f.items, j) }}</span>
-        }
-        </p>
-        <div>
-            <p><b>Follow Set</b></p>
-            <p v-for="(f,i) in followSet" :key="i">Follow of ("<span class="c">{{f.symbol}}</span>") = {
-                <span v-for="(e,j) in f.items" :key="j">{{ renderListItem(f.items, j) }}</span>
-            }
-            </p>
-        </div>
-        <p><b>Nullable Rules</b><br>
-            <span v-for="(e,i) in nullableRules" :key="i">{{e}}<br></span>
-            <span v-if="!nullableRules.length" class="c">&lt;No Rules&gt;</span>
-        </p>
-    </div>
-</template>
-
-<script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 
 import lang from '@/lang/index'
-import {L1Sim, Symbl, Grammar} from '@/sim/ll1'
+import {L1Sim, Symbl, Grammar, Rule} from '@/sim/ll1'
 import AppControl from '@/manage/app'
 
 interface FsDisplay {
@@ -45,6 +23,12 @@ export default class SimLL1 extends Vue {
   UIText = lang.gLang.ui_text;
   firstSet: FsDisplay[] = [];
   followSet: FsDisplay[] = [];
+  tokens: Symbl[] = [];
+  nterms: Symbl[] = [];
+  eofSymbol: Symbl = {id: -1, repr:'$'};
+  private sim: L1Sim | undefined;
+  ptDisplayRules = false;
+
   nullableRules: string[] = [];
 
   private setToRepr(s: L1Sim, c: SetChoice, t: Symbl): FsDisplay {
@@ -65,10 +49,36 @@ export default class SimLL1 extends Vue {
       return (i < s.length-1) ? s[i] + ', ' : s[i];
   }
 
+  private renderRule(rule: Rule): string {
+      const terms: string = rule.rhs.map(i => i.repr).join(' ');
+      return `${rule.lhs.repr} -> ${terms}`;
+  }
+
+  private renderParseTableEntry(ntID: number, tokenID: number): string[]{
+      const ruleDisplay: string[] = [];
+      const s = this.sim;
+      if (s){
+          s.getParseTableEntry(ntID, tokenID).forEach(rID => {
+              const rule = s.ruleByID.get(rID);
+              if (!rule){return;}
+              const displayString = this.ptDisplayRules ? this.renderRule(rule) : `${rule.id}`;
+              ruleDisplay.push(displayString);
+          });
+      }
+      return ruleDisplay;
+  }
+
   onSetGrammar(g: Grammar){
     const s = new L1Sim(g);
     this.firstSet = [];
     this.nullableRules = [];
+    // add <eof> and remove <e>mpty from parse table view
+    const tokens = s.tokens.filter(e => e.id != s.emptySymbl.id);
+    tokens.push(s.endOfInputSymbol);
+    this.tokens = tokens;
+    this.nterms = s.nterm;
+    this.eofSymbol = s.endOfInputSymbol;
+    this.sim = s;
     s.getFirstSet();
     s.tokens.forEach(t => {
         // <e>mpty symbol is not a token
@@ -86,6 +96,8 @@ export default class SimLL1 extends Vue {
         // follow(A) just exists for non-terminals
         this.followSet.push(this.setToRepr(s, SetChoice.Follow, nt));
     });
+    s.buildParseTable();
+    console.log(s.parseTable);
   }
 
   mounted () {
@@ -93,11 +105,3 @@ export default class SimLL1 extends Vue {
       this.$on('onEditorSetGrammar', (g: Grammar) => this.onSetGrammar(g));
   }
 }
-
-</script>
-
-<style scoped>
-    .c {
-        font-family: monospace;
-    }
-</style>

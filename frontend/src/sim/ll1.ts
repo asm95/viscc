@@ -18,16 +18,26 @@ export interface Grammar {
     maxSymbolID: number;
 }
 
+interface IterParseTableItem {
+    rule: Rule;
+    token: Symbl;
+    entry: Set<number>;
+}
+
+export type aSet = Map<number, Set<number>>;
+
 export class L1Sim {
     tokens: Symbl[];
     nterm: Symbl[];
     rules: Rule[];
-    firstSet: Map<number, Set<number>>;
-    followSet: Map<number, Set<number>>;
+    firstSet: aSet;
+    followSet: aSet;
+    parseTable: Map<number, aSet>;
     emptySymbl: Symbl;
     startSymbl: Symbl;
     endOfInputSymbol: Symbl;
     symbolByID: Map<number, Symbl>;
+    ruleByID: Map<number, Rule>;
 
     setAssign<T>(a: Set<T> | undefined, b: Set<T> | undefined){
         if (typeof a == "undefined" || typeof b == "undefined"){return;}
@@ -102,6 +112,7 @@ export class L1Sim {
             anyChanged = false;
             for (const rule of this.rules){
                 const ruleLength = rule.rhs.length;
+                const aF = this.followSet.get(rule.lhs.id); // follow(A)
                 for (let idx=0; idx < ruleLength; idx++){
                     const e: Symbl = rule.rhs[idx];
                     const eF = this.followSet.get(e.id); // follow(Xi)
@@ -118,10 +129,14 @@ export class L1Sim {
                         // todo: this doesn't look like to be fully correct (check p. 182 Louden)
                         // . missing the if <e> in First(Xi+1...Xn) then {add Follow(A) to follow(Xi)}
                         // . the else case is covering when First(Xi+1...Xn) is <e>*
+                        if (fN?.has(eS)){
+                            // add follow(A) to follow(Xi)
+                            this.setAssign(aF, eF);
+                            anyChanged = anyChanged || (eF?.size != oldSize);
+                        }
                     } else if (idx == ruleLength-1){
                         // if it's the last element
                         // add follow(A) to follow(Xi)
-                        const aF = this.followSet.get(rule.lhs.id); // follow(A)
                         this.setAssign(aF, eF); // add follow(A) to follow(Xi)
                         anyChanged = anyChanged || (eF?.size != oldSize);
                     }
@@ -130,12 +145,88 @@ export class L1Sim {
         } while (anyChanged);
     }
 
+    private setGet(s: aSet, id: number): Set<number> {
+        const e = s.get(id);
+        if (typeof e == "undefined"){return new Set<number>();}
+        return e;
+    }
+
+    private addParseTable (rule: Rule, tokenID: number): void {
+        const nt = rule.lhs; // non-terminal A
+        let s1 = this.parseTable.get(nt.id);
+        if (! s1){
+            s1 = new Map<number, Set<number>>();
+        }
+        let s2 = s1.get(tokenID);
+        if (! s2){
+            s2 = new Set<number>();
+        }
+        s2.add(rule.id);
+        s1.set(tokenID, s2);
+        this.parseTable.set(nt.id, s1);
+    }
+
+    getParseTableEntry (ntID: number, tokenID: number): Set<number>{
+        const s1 = this.parseTable.get(ntID);
+        if (s1){
+            const s2 = s1.get(tokenID);
+            if (s2){
+                return s2;
+            }
+        }
+        return new Set<number>();
+    }
+
+    *iterParseTableEntry (){
+        for (const rule of this.rules){
+            for (const token of this.tokens){
+                const i: IterParseTableItem = {
+                    rule: rule, token: token,
+                    entry: this.getParseTableEntry(rule.lhs.id, token.id)
+                };
+                yield i;
+            }
+        }
+    }
+
+    buildParseTable (): void {
+        for (const rule of this.rules){
+            let addFollow = true;
+            for (const e of rule.rhs){
+                const fE = this.setGet(this.firstSet, e.id);
+                let hasEmpty = false;
+                fE.forEach(i => {
+                    // if it's a empty symbol
+                    if (this.emptySymbl.id == i){hasEmpty = true;}
+                    // check if it's a token
+                    if (!this.tokens.find(f => f.id == i)){return;}
+                    // for each element i of first(Xi) of rule A -> x add M[A, i]
+                    this.addParseTable(rule, i);
+                });
+                addFollow = addFollow && hasEmpty;
+                // break here because looks like First(x) is First(X1), the same applies to
+                // calculating the follow set (see todo)
+                break;
+            }
+            if (addFollow){
+                const foE = this.setGet(this.followSet, rule.lhs.id); // follow(A)
+                // for each element j (token or <eof>) of follow(A) add M[A, j]
+                foE.forEach(j => {
+                    this.addParseTable(rule, j);
+                });
+            }
+        }
+    }
+
     private initSymbols(){
         for (const t of this.tokens){
             this.symbolByID.set(t.id, t);
         }
         for (const nt of this.nterm){
             this.symbolByID.set(nt.id, nt);
+        }
+        for (const r of this.rules){
+            this.ruleByID.set(r.id, r);
         }
     }
 
@@ -148,7 +239,9 @@ export class L1Sim {
         this.rules = g.rules;
         this.firstSet = new Map<number, Set<number>>();
         this.followSet = new Map<number, Set<number>>();
+        this.parseTable = new Map<number, aSet>();
         this.symbolByID = new Map<number, Symbl>();
+        this.ruleByID = new Map<number, Rule>();
         this.endOfInputSymbol = {id: g.maxSymbolID++, repr: '$'};
         this.initSymbols();
     }
