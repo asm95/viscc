@@ -26,15 +26,15 @@ interface IterParseTableItem {
     entry: Set<number>;
 }
 
-export type aSet = Map<number, Set<number>>;
-export type LL1ParseTable = Map<number, aSet>;
+export class LL1Set extends Map<number, Set<number>> {}
+export class LL1ParseTable extends Map<number, LL1Set> {}
 
 export class L1Sim {
     tokens: Symbl[];
     nterm: Symbl[];
     rules: Rule[];
-    firstSet: aSet;
-    followSet: aSet;
+    firstSet: LL1Set;
+    followSet: LL1Set;
     parseTable: LL1ParseTable;
     emptySymbl: Symbl;
     startSymbl: Symbl;
@@ -148,7 +148,7 @@ export class L1Sim {
         } while (anyChanged);
     }
 
-    private setGet(s: aSet, id: number): Set<number> {
+    private setGet(s: LL1Set, id: number): Set<number> {
         const e = s.get(id);
         if (typeof e == "undefined"){return new Set<number>();}
         return e;
@@ -240,9 +240,9 @@ export class L1Sim {
         this.tokens = g.tokens;
         this.nterm = g.nterms;
         this.rules = g.rules;
-        this.firstSet = new Map<number, Set<number>>();
-        this.followSet = new Map<number, Set<number>>();
-        this.parseTable = new Map<number, aSet>();
+        this.firstSet = new LL1Set();
+        this.followSet = new LL1Set();
+        this.parseTable = new LL1ParseTable();
         this.symbolByID = new Map<number, Symbl>();
         this.ruleByID = new Map<number, Rule>();
         this.endOfInputSymbol = {id: g.maxSymbolID++, repr: '$'};
@@ -250,8 +250,8 @@ export class L1Sim {
     }
 }
 
-enum cmdType { REPL, MATCH }
-enum itemType { TOKEN, NTERM, NONE }
+export enum cmdType { REPL, MATCH }
+export enum itemType { TOKEN, NTERM, NONE }
 
 enum LLParseError {
     NoError,
@@ -267,9 +267,9 @@ interface LLResponse {
     value: any | undefined;
 }
 
-interface LLSimInputCommand {
-    symbol: Symbl;
+export interface LLSimInputCommand {
     type: cmdType;
+    keyID: number;
 }
 
 export interface LLSimStackItem {
@@ -278,6 +278,10 @@ export interface LLSimStackItem {
 }
 
 type LLSimStack = Stack<LLSimStackItem>;
+
+export function RenderResponseMessage(res: LLResponse): string{
+    return '&lt;warning: implement&gt;';
+}
 
 export class ParseSimulator {
     pareseTable: LL1ParseTable | undefined;
@@ -306,14 +310,14 @@ export class ParseSimulator {
         return {hasError: LLParseError.NoError, args: [], value: value};
     }
 
-    applyCommand(cmd: LLSimInputCommand){
+    applyCommand(cmd: LLSimInputCommand): LLResponse{
         // when user enter a command
         const stackTop = this.stack.getTop();
         const curToken = this.getCurrentToken();
         const mkErr = this.makeResponseErr;
-        const curRule = this.rules.get(cmd.symbol.id || -1);
+        const curRule = this.rules.get(cmd.keyID || -1);
 
-        if (! stackTop){return;}
+        if (! stackTop){return this.makeResponseOK([]);}
 
         if (cmd.type == cmdType.REPL){
             // can't use switch case with lexical declarations
@@ -324,7 +328,7 @@ export class ParseSimulator {
             }
             if (! curRule){
                 // attempt to index invalid rule
-                return mkErr(LLParseError.InvalidRule, [cmd.symbol]);
+                return mkErr(LLParseError.InvalidRule, [cmd.keyID]);
             }
             if (stackTop.value.id != curRule.lhs.id){
                 return mkErr(LLParseError.AcReplErr2, [stackTop.value, curRule.lhs]);
