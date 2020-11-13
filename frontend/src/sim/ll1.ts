@@ -290,7 +290,7 @@ export class ParseSimulator {
     rules: Map<number, Rule>;
     stack: LLSimStack;
     grammar: Grammar;
-    private itemTypeMap: Map<number, itemType>;
+    itemTypeMap: Map<number, itemType>;
 
     getCurrentToken(): Symbl {
         return this.inputStream[this.inputStreamIndex];
@@ -422,6 +422,7 @@ export class ParseSimulator {
         this.inputStreamIndex = 0;
         this.rules = new Map<number, Rule>();
         this.stack = new Stack<LLSimStackItem>();
+        this.stack.pushItem({type: itemType.NTERM, value: g.startSymbol});
         this.itemTypeMap = new Map<number, itemType>();
         this.grammar = g;
         this.initSim(g);

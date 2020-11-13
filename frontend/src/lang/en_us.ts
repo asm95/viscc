@@ -3,6 +3,9 @@ import {UITextS, GEditorTextS, TextMarkup} from './skel';
 const mc = TextMarkup.markCode;
 const mb = TextMarkup.MarkBold;
 type str = string;
+type int = number;
+
+const rpw1 = (c: number) => (c>1) ? 'elements' : 'element';
 
 const UIText: UITextS = {
     version: v => `Version ${v}`,
@@ -11,12 +14,18 @@ const UIText: UITextS = {
     },
     LLSim: {
         errPrelude: 'Error:',
+        invalidCommand: (c: str) => `Command ${mc(c)} is invalid.`,
+        invalidRuleID: (r: str) => `rule ${mc(r)} does not exist`,
+        invalidToken: (t: str) => `token ${mc(t)} does not exist in token list`,
         commandRepl: (r: string) => `replace using rule ${r}`,
         commandMatch: (t: string) => `match of token "${mc(t)}" of input stream`,
         unkCommand: 'unknown command',
+        istrEmptyBeforeStack: (s: int) => `input stream is empty before stack, which still conatains ${s} ${rpw1(s)}`,
+        stackEmptyBeforeIstr: (is: int) => `stack is empty before input stream, which still conatains ${is} ${rpw1(is)}`,
+        noRulesCanBeApplied: 'invalid parser state: no rules can be applied according to the LL(1) parse table',
+        nextSuggestion: (cmd: str) => `Suggestion: ${cmd}`,
         oopsWeAreDone: `${mb('Oops!')} Looks like you reached an unrecoverable state. Either reset or undo your changes to proceed`,
         youReDone: 'You reached the end of the simulation. The machine accepts the input stream.',
-        nextSuggestion: (cmd: string) => `Suggestion: ${cmd}`,
         noInputGiven: 'no input',
         invalidInput: 'Error: invalid input',
         questions: {

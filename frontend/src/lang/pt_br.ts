@@ -3,6 +3,9 @@ import {UITextS, GEditorTextS, TextMarkup} from './skel';
 const mc = TextMarkup.markCode;
 const mb = TextMarkup.MarkBold;
 type str = string;
+type int = number;
+
+const rpw1 = (c: int) => (c>1) ? 'elementos' : 'elemento';
 
 const UIText: UITextS = {
     version: v => `Versão ${v}`,
@@ -11,12 +14,18 @@ const UIText: UITextS = {
     },
     LLSim: {
         errPrelude: 'Erro:',
+        invalidCommand: (c: str) => `Comando ${mc(c)} inválido.`,
+        invalidRuleID: (r: str) => `regra ${mc(r)} não existe`,
+        invalidToken: (t: str) => `token ${mc(t)} não existe na lista de tokens`,
         commandRepl: (r: string) => `substituir usando a regra ${r}`,
         commandMatch: (t: string) => `casar o token "${mc(t)}" com a entrada`,
         unkCommand: 'comando desconhecido',
+        istrEmptyBeforeStack: (s: int) => `a  entrada foi consumida antes da pilha, a qual ainda contém ${s} ${rpw1(s)}`,
+        stackEmptyBeforeIstr: (is: int) => `a pilha esvaziou antes da entrada, a qual ainda contém ${is} ${rpw1(is)}`,
+        noRulesCanBeApplied: 'estado inválido: nenhuma regra pode ser aplicada de acordo com a tabela de análise LL(1)',
+        nextSuggestion: (cmd: string) => `Sugestão: ${cmd}`,
         oopsWeAreDone: `${mb('Oops!')} Parece que você chegou a um estado irreparável. Desfaça as alterações ou reinicie a simulação para continuar`,
         youReDone: 'Você chegou ao fim da simulação. A máquina aceitou a cadeia de entrada',
-        nextSuggestion: (cmd: string) => `Sugestão: ${cmd}`,
         noInputGiven: 'sem entrada',
         invalidInput: 'Erro: entrada inválida',
         questions: {
