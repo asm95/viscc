@@ -104,11 +104,7 @@ export default class GramEdtior extends Vue {
             startSymbol: startSymbol,
             maxSymbolID: symblID,
         }
-        AppControl.editorSetGrammar(g);
+        this.$emit('onGrammarSet', g);
     }
-
-    mounted (){
-        //lang.gLang.setLang(lang.LangCode.ptBR);
-        //console.log(this.UIText.badRule);
-    }
+    
 }

@@ -1,6 +1,8 @@
 import {UITextS, GEditorTextS, TextMarkup} from './skel';
 
 const mc = TextMarkup.markCode;
+const mb = TextMarkup.MarkBold;
+type str = string;
 
 const UIText: UITextS = {
     version: v => `Versão ${v}`,
@@ -8,9 +10,18 @@ const UIText: UITextS = {
         me: 'olá'
     },
     LLSim: {
+        errPrelude: 'Erro:',
+        commandRepl: (r: string) => `substituir usando a regra ${r}`,
+        commandMatch: (t: string) => `casar o token "${mc(t)}" com a entrada`,
+        unkCommand: 'comando desconhecido',
+        oopsWeAreDone: `${mb('Oops!')} Parece que você chegou a um estado irreparável. Desfaça as alterações ou reinicie a simulação para continuar`,
+        youReDone: 'Você chegou ao fim da simulação. A máquina aceitou a cadeia de entrada',
+        nextSuggestion: (cmd: string) => `Sugestão: ${cmd}`,
+        noInputGiven: 'sem entrada',
+        invalidInput: 'Erro: entrada inválida',
         questions: {
-            a1: (
-                `Dada a pilha ${mc('$ S')}, cadeia de entrada ${mc('( )$')} e as regras a seguir, 
+            a1: (s: str, i: str) => (
+                `Dada a pilha ${mc(s ? s : '??')}, cadeia de entrada ${mc(i ? (i+' $') : '??')} e as regras a seguir, 
                 quais passos devem ser executados para que a cadeia seja aceita?`
             )
         },

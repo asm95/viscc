@@ -417,8 +417,8 @@ export class ParseSimulator {
         }
     }
 
-    constructor(inputStream: string, g: Grammar){
-        this.inputStream = [];
+    constructor(inputStream: Symbl[], g: Grammar){
+        this.inputStream = inputStream;
         this.inputStreamIndex = 0;
         this.rules = new Map<number, Rule>();
         this.stack = new Stack<LLSimStackItem>();

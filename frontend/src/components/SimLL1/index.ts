@@ -1,4 +1,5 @@
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
+import { PropType } from 'vue'
 
 import lang from '@/lang/index'
 import {L1Sim, Symbl, Grammar, Rule} from '@/sim/ll1'
@@ -22,13 +23,7 @@ interface ComponentConfig {
     showParseTableConflicts: boolean;
 }
 
-@Component({
-    methods: {
-        shot: () => {
-            console.log('out');
-        }
-    }
-})
+@Component({})
 export default class LL1Info extends Vue {
   UIText = lang.gLang.uiText;
   firstSet: FsDisplay[] = [];
@@ -40,6 +35,8 @@ export default class LL1Info extends Vue {
   ptDisplayRules = false;
   nullableRules: string[] = [];
   config: ComponentConfig = {showParseTableConflicts: true};
+
+  @Prop({type: Object as PropType<Grammar>}) readonly grammar!: Grammar;
 
   private setToRepr(s: L1Sim, c: SetChoice, t: Symbl): FsDisplay {
     const fS = c == SetChoice.First ? s.firstSet.get(t.id) : s.followSet.get(t.id); // first(X) or follow(X)
@@ -107,11 +104,10 @@ export default class LL1Info extends Vue {
         this.followSet.push(this.setToRepr(s, SetChoice.Follow, nt));
     });
     s.buildParseTable();
-    console.log(s.parseTable);
   }
 
-  mounted () {
-      AppControl.registerSimulator(this);
-      this.$on('onEditorSetGrammar', (g: Grammar) => this.onSetGrammar(g));
+  @Watch('grammar')
+  onUserInputGrammar(nV: Grammar, oV: Grammar){
+      this.onSetGrammar(nV);
   }
 }

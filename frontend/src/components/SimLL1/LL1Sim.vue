@@ -1,6 +1,6 @@
 <template>
     <div>
-        <p v-html="uiText.questions.a1"></p>
+        <p v-html="questionText"></p>
         <!-- component stack and input stream -->
         <div class="columns">
             <div class="column">
@@ -61,7 +61,7 @@ import Simulator from './simulator'
 export default Simulator;
 </script>
 
-<style scoped>
+<style>
     /* text-color error */
     .tc.err {color: #e84622;}
     .c {font-family: monospace;}
