@@ -24,7 +24,7 @@ interface ComponentConfig {
 
 @Component({})
 export default class LL1Info extends Vue {
-  UIText = lang.gLang.uiText;
+  uiText = lang.gLang.uiText.LLView;
   firstSet: FsDisplay[] = [];
   followSet: FsDisplay[] = [];
   tokens: Symbl[] = [];

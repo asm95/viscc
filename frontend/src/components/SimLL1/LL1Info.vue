@@ -1,23 +1,24 @@
 <template>
     <div>
-        <p><b>First Set</b></p>
+        <div class="sec-title">{{uiText.lblFirstSet}}</div>
         <p v-for="(f,i) in firstSet" :key="i">First of ("<span class="c">{{f.symbol}}</span>") = {
             <span v-for="(e,j) in f.items" :key="j">{{ renderListItem(f.items, j) }}</span>
         }
         </p>
         <div>
-            <p><b>Follow Set</b></p>
+            <div class="sec-title">{{uiText.lblFollowSet}}</div>
             <p v-for="(f,i) in followSet" :key="i">Follow of ("<span class="c">{{f.symbol}}</span>") = {
                 <span v-for="(e,j) in f.items" :key="j">{{ renderListItem(f.items, j) }}</span>
             }
             </p>
         </div>
-        <p><b>Nullable Rules</b><br>
+        <div>
+            <div class="sec-title">{{uiText.lblNullableRules}}</div>
             <span v-for="(e,i) in nullableRules" :key="i">{{e}}<br></span>
             <span v-if="!nullableRules.length" class="c">&lt;No Rules&gt;</span>
-        </p>
+        </div>
         <div>
-            <p><b>Parse Table</b></p>
+            <div class="sec-title">{{uiText.lblParseTable}}</div>
             <table class="table">
                 <thead>
                     <tr>
@@ -53,5 +54,9 @@ export default LL1Info;
     }
     .ptConflict {
         color: red;
+    }
+    .sec-title {
+        font-size: medium;
+        font-weight: bold;
     }
 </style>

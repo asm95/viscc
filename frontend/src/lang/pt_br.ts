@@ -23,7 +23,11 @@ const UIText: UITextS = {
     LLView: {
         lblGramEditor: 'Editor de Gramática',
         lblLLInfo: 'Informações LL(1)',
-        lblSimulator: 'Simulador'
+        lblSimulator: 'Simulador',
+        lblFirstSet: 'Conjunto First',
+        lblFollowSet: 'Conjunto Follow',
+        lblNullableRules: 'Regras Anuláveis',
+        lblParseTable: 'Tabela de Análise'
     },
     LLSim: {
         errPrelude: 'Erro:',
