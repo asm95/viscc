@@ -68,6 +68,7 @@ const UIText: UITextS = {
             NoError: 'no error',
             InvalidRule: (r: str) => `rule ${r} not found`,
             eofIS: 'cannot apply command when end of input is reached',
+            StackEmpty: 'cant apply command when stack is empty',
             AcReplErr1: (t: str) => `top of stack ${mc(t)} is not a non-terminal`,
             AcReplErr2: (t: str, s: str) => `top of stack ${mc(t)} doesn't match rule lefthand side symbol ${mc(s)}`,
             AcMatchErr1: (t: str, s: str) => `attempt to match the token "${mc(t)}" of input stream where top of stack the non-terminal  ${mc(s)}`,

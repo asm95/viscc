@@ -22,6 +22,12 @@ export default class Stack<T> {
         return this.s.length;
     }
 
+    popAll(): T[]{
+        const s = this.s;
+        this.s = [];
+        return s;
+    }
+
     constructor(){
         this.s = [];
     }

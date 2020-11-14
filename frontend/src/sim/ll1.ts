@@ -256,12 +256,12 @@ export class L1Sim {
 export enum cmdType { REPL, MATCH }
 export enum itemType { TOKEN, NTERM, NONE }
 
-enum LLParseError {
+export enum LLParseError {
     NoError,
     AcReplErr1, AcReplErr2,
     AcMatchErr1, AcMatchErr2,
     SgErr1, SgErr2, SgErr3, SgErr4, SgErr5,
-    InvalidRule, eofIS
+    InvalidRule, eofIS, StackEmpty
 }
 
 interface LLResponse {
@@ -297,6 +297,7 @@ export function RenderResponseMessage(res: LLResponse): string {
         case LLParseError.SgErr5: outText = text.SgErr5; break;
         case LLParseError.InvalidRule: outText = text.InvalidRule; break;
         case LLParseError.eofIS: outText = text.eofIS; break;
+        case LLParseError.StackEmpty: outText = text.StackEmpty; break;
         default: outText = '&lt;warning: implemented&gt;';
     }
     if (typeof outText == 'function'){
@@ -333,17 +334,19 @@ export class ParseSimulator {
         return {hasError: LLParseError.NoError, args: [], value: value};
     }
 
-    applyCommand(cmd: LLSimInputCommand): LLResponse{
+    applyCommand(cmd: LLSimInputCommand): LLResponse {
         // when user enter a command
         const stackTop = this.stack.getTop();
         const curToken = this.getCurrentToken();
         const mkErr = this.makeResponseErr;
         const curRule = this.rules.get(cmd.keyID);
 
-        if (! stackTop){return this.makeResponseOK([]);}
+        if (! stackTop){
+            return mkErr(LLParseError.StackEmpty, []);
+        }
 
-        if (this.inputStreamIndex == this.inputStream.length){
-            // end of input-stream reached
+        if (this.inputStreamIndex == this.inputStream.length-1){
+            // end of input-stream reached (the '$' symbol)
             return mkErr(LLParseError.eofIS, []);
         }
 
@@ -364,8 +367,8 @@ export class ParseSimulator {
             // this should be an atomic operation 
             // . (no calls to "isAccept" method should be done in parallel)
             const outStackValue = this.stack.popItem();
-            // .reverse does operation in place, that's why we use .splice
-            const toPushItems: LLSimStackItem[] = curRule.rhs.splice(0).reverse()
+            // .reverse does operation in place, that's why we use '...' operator
+            const toPushItems: LLSimStackItem[] = [... curRule.rhs].reverse()
                 .filter(e => e.id != this.grammar.emptySymbol.id)
                 .map((e): LLSimStackItem => {
                     const t = this.itemTypeMap.get(e.id);
@@ -387,6 +390,7 @@ export class ParseSimulator {
         }
         return mkErr(LLParseError.NoError, []);
     }
+
     getNextCommand (): LLResponse {
         // based on the parsing table, it will generate a command that
         // . the user needs to apply next if it's desired to parse the
@@ -413,7 +417,8 @@ export class ParseSimulator {
                 // we reached the end of input, so we can't match anything
                 return mkErr(LLParseError.SgErr3, []);
             }
-            return mkOK({type: cmdType.MATCH, symbol: curToken});
+            const cmd: LLSimInputCommand = {type: cmdType.MATCH, keyID: curToken.id};
+            return mkOK(cmd);
         } else if (stackTop.type == itemType.NTERM){
             const rowEntry = this.pareseTable.get(stackTop.value.id);
             if (!rowEntry){
@@ -427,7 +432,8 @@ export class ParseSimulator {
                 return mkErr(LLParseError.SgErr5, [stackTop.value.repr, curToken.repr]);
             }
             const ruleID = ruleEntry.values().next().value;
-            return mkOK({type: cmdType.REPL, symbol: ruleID});
+            const cmd: LLSimInputCommand = {type: cmdType.REPL, keyID: ruleID};
+            return mkOK(cmd);
         }
 
         // this cannot be reached but compiler complains
@@ -447,14 +453,23 @@ export class ParseSimulator {
         }
     }
 
+    reset(){
+        this.inputStreamIndex = 0;
+        this.stack.popAll();
+        const initItem: LLSimStackItem = {
+            type: itemType.NTERM, value: this.grammar.startSymbol
+        }
+        this.stack.pushItem(initItem);
+    }
+
     constructor(inputStream: Symbl[], g: Grammar){
         this.inputStream = inputStream;
         this.inputStreamIndex = 0;
         this.rules = new Map<number, Rule>();
         this.stack = new Stack<LLSimStackItem>();
-        this.stack.pushItem({type: itemType.NTERM, value: g.startSymbol});
         this.itemTypeMap = new Map<number, itemType>();
         this.grammar = g;
         this.initSim(g);
+        this.reset();
     }
 }

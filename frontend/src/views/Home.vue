@@ -2,7 +2,7 @@
   <div class="home">
     <img alt="Vue logo" src="../assets/logo.png" width="32px">
     <GEditor @onGrammarSet="onEditorGrammarSet" />
-    <LL1Info :grammar="grammar"/>
+    <LL1Info @onInfoProcess="onInfoRefresh" :grammar="grammar"/>
     <div>
       <h3>Input String</h3>
       <p v-if="errMsg" class="errMsg">{{errMsg}}</p>
@@ -24,7 +24,7 @@ import Tree from '@/components/Graph/tree';
 import lang from '../lang/index'
 
 import {Settings as SimSettings} from '@/components/SimLL1/simulator';
-import { Grammar, ParseSimulator, Symbl } from '../sim/ll1';
+import { Grammar, L1Sim, ParseSimulator, LL1ParseTable, Symbl } from '../sim/ll1';
 
 const langText: any = lang.gLang.uiText.LLSim;
 
@@ -37,6 +37,7 @@ export default class Home extends Vue {
 
   simSettings: SimSettings;
   parseSimulator: ParseSimulator;
+  parseTable: LL1ParseTable | undefined;
   grammar: Grammar;
   simulatorEnabled = false;
   tokensMap: Map<string, Symbl>;
@@ -57,6 +58,13 @@ export default class Home extends Vue {
     this.simulatorEnabled = true;
   }
 
+  onInfoRefresh(info: L1Sim){
+    // update parse-table
+    // we still have a problem with the interface as it doesn't automatically
+    // refresh it
+    this.parseTable = info.parseTable;
+  }
+
   onInputSet (ev: Event) {
     // check the input string
     const input = this.inputString;
@@ -72,7 +80,9 @@ export default class Home extends Vue {
     // clear error message
     this.errMsg = '';
     // set new simulator
-    this.parseSimulator = new ParseSimulator(inputStream, this.grammar);
+    const sim = new ParseSimulator(inputStream, this.grammar);
+    sim.pareseTable = this.parseTable;
+    this.parseSimulator = sim;
   }
 
   private getEmptyGrammar(): Grammar {
@@ -90,7 +100,7 @@ export default class Home extends Vue {
     super();
     this.grammar = this.getEmptyGrammar();
     this.parseSimulator = new ParseSimulator([], this.grammar);
-    this.simSettings = {showSuggestions: true, showLines: true};
+    this.simSettings = {showSuggestions: true, showLines: true, optMoboVer: false};
     this.tokensMap = new Map<string, Symbl>();
     lang.gLang.setLang(lang.LangCode.ptBR);
   }

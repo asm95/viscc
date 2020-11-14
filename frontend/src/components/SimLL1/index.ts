@@ -103,6 +103,7 @@ export default class LL1Info extends Vue {
         this.followSet.push(this.setToRepr(s, SetChoice.Follow, nt));
     });
     s.buildParseTable();
+    this.$emit('onInfoProcess', this.sim);
   }
 
   @Watch('grammar')

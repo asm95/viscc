@@ -45,7 +45,7 @@
                 <p v-html="errMsg.fatalState"></p>
                 <div class="btnRestart">
                 <button v-on:click="onResetBtnClick" class="button" alt="Restart">
-                    <img v-bind:class="['icn', config.optMoboVer ? 'md' : 'sm']" src="<%= BASE_URL %>/vendor/icon/bs/arrow-counterclockwise.svg">
+                    <Arrow :class="['icn', conf.optMoboVer ? 'md' : 'sm']" />
                 </button>
                 </div>
             </div>

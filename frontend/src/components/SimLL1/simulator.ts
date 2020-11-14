@@ -1,18 +1,22 @@
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
 import { PropType } from 'vue'
 
-import { LLSimInputCommand, cmdType, ParseSimulator, RenderResponseMessage, Rule, itemType, Symbl } from '@/sim/ll1'
+import { LLSimInputCommand, LLParseError, cmdType, ParseSimulator, RenderResponseMessage, Rule, itemType, Symbl } from '@/sim/ll1'
 import ComponentTelemetry from './telemetry'
 import lang from '@/lang';
+
+import icons from '@/components/icons';
 
 export interface Settings {
     showSuggestions: boolean;
     showLines: boolean;
+    optMoboVer: boolean;
 }
 
 const DefaultSettings: Settings = {
     showSuggestions: true,
-    showLines: true
+    showLines: true,
+    optMoboVer: false
 }
 
 interface DisplayableElement {
@@ -32,7 +36,7 @@ interface ErrorMsgView {
 }
 
 enum ObjectState {
-    hasError, isOk, isDone
+    hasError, isOk, isDone, isPending
 }
 
 interface SimulatorStatus {
@@ -73,6 +77,11 @@ function parseRule (s: ParseSimulator, rule: Rule): DisplayableElement {
         if (rType == itemType.NTERM){
             return `<b>${e.repr}</b>`;
         }
+        // then it is a token
+        else if (e.id == s.grammar.emptySymbol.id){
+            // if it's a empty symbol
+            return `ε`;
+        }
         return e.repr;
     });
     return {display: `<b>${rule.lhs.repr}</b> → ${rhsSymbols.join(' ')}`};
@@ -90,7 +99,9 @@ const langText: any = lang.gLang.uiText.LLSim;
 const uiNoInput: DisplayableElement = {display: '', update: () => `&lt;${langText.noInputGiven}&gt;`};
 
 
-@Component({})
+@Component({
+    components: {Arrow: icons.Arrow}
+})
 export default class Simulator extends Vue {
 
     @Prop({type: Object as PropType<Settings>, default: DefaultSettings}) readonly conf!: Settings;
@@ -154,10 +165,66 @@ export default class Simulator extends Vue {
         this.inputDisabled = ! toggle;
     }
 
-    updateValidState(): Response{
+    updateValidState(): Response {
         // update global state to check if we reached any invalid condition state
         // todo: implement
-        const status = makeOK('');
+        let status = makeOK('');
+        const sim = this.simulator;
+        const stackIsEmpty = sim.stackIsEmpty();
+        const inputString = sim.inputStream;
+        const inputStringIndex = sim.inputStreamIndex;
+        const istrIsComsumed = (inputStringIndex == inputString.length-1);
+        let state = ObjectState.isOk;
+        // first we check if we can use the LL(1) parse table which always tells us
+        // . the next step - or returns an error if the parser reached an invalid
+        // . state which is just a combination of invalid commands or the grammar
+        // . is not LL(1)
+        const nextCmd = sim.getNextCommand();
+        if (stackIsEmpty && istrIsComsumed){
+            // we reached the accept state with empty stack
+            state = ObjectState.isDone;
+        }
+        else if (nextCmd.hasError == LLParseError.SgErr1){
+            // we don't have our LL(1) parse table to help, so we have test some
+            // . corner cases
+            if (stackIsEmpty && !istrIsComsumed){
+                // dead end: the user can't apply any operation and there are
+                // . still tokens to be consumed
+                state = ObjectState.hasError;
+                const remainCount = inputString.length - inputStringIndex - 1;
+                status = makeError(this.uiText.stackEmptyBeforeIstr(remainCount));
+            } else if (!stackIsEmpty && istrIsComsumed){
+                // without the parse table we can still check for a specific case
+                const stackTop = sim.getStackTop();
+                if (stackTop){
+                    if (stackTop.type == itemType.TOKEN){
+                        // this is the only case we have certain there's nothing to do
+                        // . because there's a terminal to be matched when there's no
+                        // . tokens yet to be consumed
+                        state = ObjectState.hasError;
+                        const remainCount = sim.stack.size();
+                        status = makeError(this.uiText.istrEmptyBeforeStack(remainCount));
+                    } else {
+                        // this is the case we have a non-terminal, no parsing table
+                        // . to rely on so probrably something with the input itself
+                        // . is wrong: either the grammar is not LL(1), or has
+                        // . illegal rules or else. In this case we leave the user
+                        // . on his/her own
+                        state = ObjectState.isPending;
+                    }
+                }
+                
+            }
+        }
+        else if (nextCmd.hasError){
+            // the simulator couldn't predict next step, so probrably we 
+            // . ended in a inconsistent state because the parse table always
+            // . tells the correct step to perform, given a particular parse 
+            // . state (assuming the gramar is in fact LL1)
+            state = ObjectState.hasError;
+            status = makeError(this.uiText.noRulesCanBeApplied);
+        }
+        this.pending.inputStream = state;
         return status;
     }
 
@@ -180,6 +247,7 @@ export default class Simulator extends Vue {
         // user did something terribly wrong, either reset the machine or undo
         if (toggle == true){
             this.errMsg.fatalState = this.uiText.oopsWeAreDone;
+            this.setInputEnabled(false);
         } else {
             this.errMsg.fatalState = '';
         }
@@ -240,6 +308,7 @@ export default class Simulator extends Vue {
                     // we have to update entire UI if some special
                     // . condition has reached
                     const status = this.updateValidState();
+                    console.log(status);
                     if (status.hasError){
                         // we need to either to undo or reset the machine
                         this.setInputError(status.msg);
@@ -264,9 +333,15 @@ export default class Simulator extends Vue {
             }
         }
         if (simEnded){
-        // log we reached the end of simulation
-        this.telemetry.dog.logCommand('e');
+            // log we reached the end of simulation
+            this.telemetry.dog.logCommand('e');
         }
+    }
+
+    onResetBtnClick(ev: MouseEvent){
+        this.onReset(false);
+        // log we reset the machine
+        this.telemetry.dog.logCommand('r');
     }
 
     private updateStack(){
@@ -279,25 +354,34 @@ export default class Simulator extends Vue {
         });
     }
 
-    private onReset (){
+    private onReset (isFirstReset: boolean){
         const inputStream = this.simulator.inputStream;
+        const simGrammar = this.simulator.grammar;
         let inputDisplay = '';
         if (inputStream.length == 0){
             this.inputStream = updateDE(uiNoInput);
         } else {
-            inputStream.push(this.simulator.grammar.eofSymbol);
+            if (isFirstReset){
+                // if it's the frist time the machine is booting then
+                // . we have to append <eof> symbol to the input stream
+                // subsequent boots doesn't need to do that
+                inputStream.push(simGrammar.eofSymbol);
+            }
             inputDisplay = inputStream.map(i => i.repr).join('');
             this.inputStream = {display: inputDisplay}
             this.updateInputStream();
         }
-        this.questionText = this.uiText.questions.a1('$ S', inputDisplay);
+        const stackDisplay = `${simGrammar.eofSymbol.repr} ${simGrammar.startSymbol.repr}`;
+        this.questionText = this.uiText.questions.a1(stackDisplay, inputDisplay);
         this.updateStack();
         this.pending = {
             inputStream: ObjectState.isOk,
             stack: ObjectState.isOk
         }
+        // reset simulator
+        this.simulator.reset();
         // fill rule list
-        this.availRules = this.simulator.grammar.rules.map(r => parseRule(this.simulator, r));
+        this.availRules = simGrammar.rules.map(r => parseRule(this.simulator, r));
         // get the first suggestion
         this.updateSuggestions();
         // clear command history
@@ -312,7 +396,7 @@ export default class Simulator extends Vue {
 
     @Watch('simulator')
     onSimulatorSet(nV: ParseSimulator, oV: ParseSimulator){
-        this.onReset();
+        this.onReset(true);
     }
 
     constructor(){

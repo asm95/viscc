@@ -68,6 +68,7 @@ const UIText: UITextS = {
             NoError: 'não há erro',
             InvalidRule: (r: str) => `regra ${r} não encontrada`,
             eofIS: 'não é possível aplicar comandos quando a cadeia esgotou-se',
+            StackEmpty: 'não é possível aplicar comandos com a pilha vazia',
             AcReplErr: 'não foi possível executar a ação de substituir',
             AcReplErr1: (t: str) => `topo da pilha ${mc(t)} não é um não-terminal`,
             AcReplErr2: (t: str, s: str) => `topo da pilha ${mc(t)} não casa com o não-terminal ${mc(s)} do lado esquerdo da regra`,
