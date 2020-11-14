@@ -90,7 +90,6 @@ function parseRule (s: ParseSimulator, rule: Rule): DisplayableElement {
 function makeError(msg: string): Response {
     return {hasError: true, msg: msg};
 }
-
 function makeOK(msg: string): Response {
     return {hasError: false, msg: msg};
 }
@@ -233,13 +232,19 @@ export default class Simulator extends Vue {
         const sim = this.simulator;
         const currentInput = sim.inputStreamIndex;
         const content = sim.inputStream.map(e => e.repr);
-        const curClass = 't ' + this.pending.inputStream;
-        content[currentInput] = '<span class="sim1 '+curClass+'">' + content[currentInput] + '</span>';
+        let c = 'o';
+        switch(this.pending.inputStream){
+            case ObjectState.hasError: c = 'e'; break;
+            case ObjectState.isDone: c = 'd'; break;
+            case ObjectState.isPending: c = 'p'; break;
+        }
+        content[currentInput] = `<span class="sim1 t ${c}">${content[currentInput]}</span>`;
         return content.join(' ');
     }
 
     updateInputStream(){
         // update token stream visualization
+        if (!this.simulator.inputStream.length){return;}
         this.inputStream.display = this.displayInput();
     }
 
@@ -369,7 +374,6 @@ export default class Simulator extends Vue {
             }
             inputDisplay = inputStream.map(i => i.repr).join('');
             this.inputStream = {display: inputDisplay}
-            this.updateInputStream();
         }
         const stackDisplay = `${simGrammar.eofSymbol.repr} ${simGrammar.startSymbol.repr}`;
         this.questionText = this.uiText.questions.a1(stackDisplay, inputDisplay);
@@ -386,11 +390,14 @@ export default class Simulator extends Vue {
         this.updateSuggestions();
         // clear command history
         this.commandHistory = [];
-        // allow user to input and reset any error messages
+        // reset any error messages
         this.setDeadlineOptsEnabled(false);
         this.setInputError(undefined);
         // we decide only based on the input-string (for now)
         const canEnableInput = inputStream.length > 0;
+        // update input stream view
+        this.updateInputStream();
+        // allow user to input
         this.setInputEnabled(canEnableInput);
     }
 

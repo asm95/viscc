@@ -71,10 +71,10 @@ export default Simulator;
         text-align: center;
     }
 
-    /* sim1 = simulator type 1 = LL(1); t = token; w = walking; p = pending; o = ok; e = error*/
-    .sim1{border: 1px solid;}
-    .sim1.t.w {border-color: blue;}
+    /* sim1 = simulator type 1 = LL(1); t = token; o = walking (is ok); p = pending; d = done; e = error*/
+    .sim1 {border: 1px solid;}
+    .sim1.t.o {border-color: blue;}
     .sim1.t.p {border-color: yellow;}
-    .sim1.t.o {border-color: green;}
+    .sim1.t.d {border-color: green;}
     .sim1.t.e {border-color: red;}
 </style>
