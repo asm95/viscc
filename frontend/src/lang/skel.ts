@@ -4,11 +4,9 @@ export interface UITextS {
         me: string;
     };
     // deeply nested strings can get pretty complicated
+    GEditor: any;
+    LLView: any;
     LLSim: any;
-}
-
-export interface GEditorTextS {
-    badRule: string;
 }
 
 export class TextMarkup {

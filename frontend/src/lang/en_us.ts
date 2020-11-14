@@ -1,4 +1,4 @@
-import {UITextS, GEditorTextS, TextMarkup} from './skel';
+import {UITextS, TextMarkup} from './skel';
 
 const mc = TextMarkup.markCode;
 const mb = TextMarkup.MarkBold;
@@ -11,6 +11,19 @@ const UIText: UITextS = {
     version: v => `Version ${v}`,
     about: {
         me: 'hello'
+    },
+    GEditor: {
+        badRule: 'Invalid rule',
+        lblEnterGrammar: 'Enter grammar...',
+        lblSubmit: 'Submit',
+        lblRules: 'Rule',
+        lblNonTerm: 'Non-terminals',
+        lblTerm: 'Terminals'
+    },
+    LLView: {
+        lblGramEditor: 'Grammar Editor',
+        lblLLInfo: 'LL(1) Info',
+        lblSimulator: 'Simulator'
     },
     LLSim: {
         errPrelude: 'Error:',
@@ -83,8 +96,4 @@ const UIText: UITextS = {
     }
 }
 
-const GEditorText: GEditorTextS = {
-    badRule: 'Invalid rule'
-}
-
-export default {UIText, GEditorText};
+export default {UIText};

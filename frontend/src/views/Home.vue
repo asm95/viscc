@@ -1,12 +1,18 @@
 <template>
   <div class="home">
     <img alt="Vue logo" src="../assets/logo.png" width="32px">
-    <GEditor @onGrammarSet="onEditorGrammarSet" />
-    <LL1Info @onInfoProcess="onInfoRefresh" :grammar="grammar"/>
     <div>
-      <h3>Input String</h3>
+      <div class="title">{{uiText.lblGramEditor}}</div>
+      <GEditor @onGrammarSet="onEditorGrammarSet" />
+    </div>
+    <div>
+      <div class="title">{{uiText.lblLLInfo}}</div>
+      <LL1Info @onInfoProcess="onInfoRefresh" :grammar="grammar"/>
+    </div>
+    <div>
+      <div class="title">{{uiText.lblSimulator}}</div>
       <p v-if="errMsg" class="errMsg">{{errMsg}}</p>
-      <input type="text" @change="onInputSet" :disabled="! simulatorEnabled" v-model="inputString" class="input">
+      <input type="text" placeholder="input stream" @change="onInputSet" :disabled="! simulatorEnabled" v-model="inputString" class="input">
     </div>
     <LL1Sim :conf="simSettings" :simulator="parseSimulator"/>
     <Tree/>
@@ -34,7 +40,6 @@ const langText: any = lang.gLang.uiText.LLSim;
   },
 })
 export default class Home extends Vue {
-
   simSettings: SimSettings;
   parseSimulator: ParseSimulator;
   parseTable: LL1ParseTable | undefined;
@@ -43,6 +48,7 @@ export default class Home extends Vue {
   tokensMap: Map<string, Symbl>;
   inputString = '';
   errMsg = '';
+  uiText: any = lang.gLang.uiText.LLView;
 
   onEditorGrammarSet (g: Grammar){
     this.grammar = g;
@@ -110,5 +116,9 @@ export default class Home extends Vue {
 <style scoped>
   .errMsg {
     color: red;
+  }
+  .title {
+    font-size: large;
+    text-align: center;
   }
 </style>

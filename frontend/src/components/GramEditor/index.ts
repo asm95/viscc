@@ -1,7 +1,6 @@
 import { Vue, Component } from 'vue-property-decorator';
 import {Symbl, Grammar, Rule} from '@/sim/ll1'
 import lang from '@/lang/index'
-import AppControl from '@/manage/app';
 
 import Icons from '@/components/icons';
 
@@ -20,7 +19,7 @@ export default class GramEdtior extends Vue {
     emptySymbol: Symbl = {id: -1, repr: '~'};
     eofSymbol: Symbl = {id: -1, repr: '$'};
 
-    UIText = lang.gLang.EditorText;
+    uiText = lang.gLang.uiText.GEditor;
 
     private renderListItem(s: Array<any>, i: number){
         return (i < s.length-1) ? s[i].repr + ' ' : s[i].repr;
@@ -45,7 +44,7 @@ export default class GramEdtior extends Vue {
             if (line.length == 0 || line[0] == '#'){continue;}
             const lrule = line.split('->');
             if (lrule.length != 2){
-                this.errorMsg = this.UIText.badRule; return;
+                this.errorMsg = this.uiText.badRule; return;
             }
             const lhs = lrule[0].trim();
             let lhsSymbl = mNterms.get(lhs);
