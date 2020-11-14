@@ -1,4 +1,6 @@
 import Stack from './base/stack'
+import lang from '@/lang'
+
 
 export interface Symbl {
     id: number;
@@ -16,6 +18,7 @@ export interface Grammar {
     nterms: Symbl[];
     rules: Rule[];
     emptySymbol: Symbl;
+    eofSymbol: Symbl;
     startSymbol: Symbl;
     maxSymbolID: number;
 }
@@ -258,7 +261,7 @@ enum LLParseError {
     AcReplErr1, AcReplErr2,
     AcMatchErr1, AcMatchErr2,
     SgErr1, SgErr2, SgErr3, SgErr4, SgErr5,
-    InvalidRule
+    InvalidRule, eofIS
 }
 
 interface LLResponse {
@@ -279,8 +282,28 @@ export interface LLSimStackItem {
 
 type LLSimStack = Stack<LLSimStackItem>;
 
-export function RenderResponseMessage(res: LLResponse): string{
-    return '&lt;warning: implement&gt;';
+export function RenderResponseMessage(res: LLResponse): string {
+    const text = lang.gLang.uiText.LLSim.machine;
+    let outText: string | Function = '';
+    switch(res.hasError){
+        case LLParseError.AcReplErr1: outText = text.AcReplErr1; break;
+        case LLParseError.AcReplErr2: outText = text.AcReplErr2; break;
+        case LLParseError.AcMatchErr1: outText = text.AcMatchErr1; break;
+        case LLParseError.AcMatchErr2: outText = text.AcMatchErr2; break;
+        case LLParseError.SgErr1: outText = text.SgErr1; break;
+        case LLParseError.SgErr2: outText = text.SgErr2; break;
+        case LLParseError.SgErr3: outText = text.SgErr3; break;
+        case LLParseError.SgErr4: outText = text.SgErr4; break;
+        case LLParseError.SgErr5: outText = text.SgErr5; break;
+        case LLParseError.InvalidRule: outText = text.InvalidRule; break;
+        case LLParseError.eofIS: outText = text.eofIS; break;
+        default: outText = '&lt;warning: implemented&gt;';
+    }
+    if (typeof outText == 'function'){
+        return outText.call(outText, ...res.args);
+    } else {
+        return outText;
+    }
 }
 
 export class ParseSimulator {
@@ -315,41 +338,48 @@ export class ParseSimulator {
         const stackTop = this.stack.getTop();
         const curToken = this.getCurrentToken();
         const mkErr = this.makeResponseErr;
-        const curRule = this.rules.get(cmd.keyID || -1);
+        const curRule = this.rules.get(cmd.keyID);
 
         if (! stackTop){return this.makeResponseOK([]);}
+
+        if (this.inputStreamIndex == this.inputStream.length){
+            // end of input-stream reached
+            return mkErr(LLParseError.eofIS, []);
+        }
 
         if (cmd.type == cmdType.REPL){
             // can't use switch case with lexical declarations
             // . more info: https://eslint.org/docs/rules/no-case-declarations
-            if (stackTop.type != itemType.TOKEN){
+            if (stackTop.type != itemType.NTERM){
                 // attempt to replace rule that doesn't match with top of stack
-                return mkErr(LLParseError.AcReplErr1, [stackTop.value]);
+                return mkErr(LLParseError.AcReplErr1, [stackTop.value.repr]);
             }
             if (! curRule){
                 // attempt to index invalid rule
                 return mkErr(LLParseError.InvalidRule, [cmd.keyID]);
             }
             if (stackTop.value.id != curRule.lhs.id){
-                return mkErr(LLParseError.AcReplErr2, [stackTop.value, curRule.lhs]);
+                return mkErr(LLParseError.AcReplErr2, [stackTop.value.repr, curRule.lhs.repr]);
             }
             // this should be an atomic operation 
             // . (no calls to "isAccept" method should be done in parallel)
             const outStackValue = this.stack.popItem();
-            const toPushItems: LLSimStackItem[] = curRule.rhs.reverse()
+            // .reverse does operation in place, that's why we use .splice
+            const toPushItems: LLSimStackItem[] = curRule.rhs.splice(0).reverse()
                 .filter(e => e.id != this.grammar.emptySymbol.id)
                 .map((e): LLSimStackItem => {
-                    return {type: this.itemTypeMap.get(e.id) || itemType.NONE, value: e}
+                    const t = this.itemTypeMap.get(e.id);
+                    return {type: (t != undefined) ? t : itemType.NONE, value: e}
                 });
             this.stack.pushItem(toPushItems);
         } else if (cmd.type == cmdType.MATCH){
             if (stackTop.type != itemType.TOKEN){
                 // attempt to match a token of input stream where the top of stack is non-terminal
-                return mkErr(LLParseError.AcMatchErr1, [curToken, stackTop.value]);
+                return mkErr(LLParseError.AcMatchErr1, [curToken.repr, stackTop.value.repr]);
             }
             if (stackTop.value.id != curToken.id){
                 // attempt to match a token which is not the same as the top of stack
-                return mkErr(LLParseError.AcMatchErr2, [curToken, stackTop.value]);
+                return mkErr(LLParseError.AcMatchErr2, [curToken.repr, stackTop.value.repr]);
             }
             this.stack.popItem();
             // advance on input stream
@@ -389,12 +419,12 @@ export class ParseSimulator {
             if (!rowEntry){
                 // no entry was found for the given machine state, so we
                 // . can't make any correct suggestions
-                return mkErr(LLParseError.SgErr4, [stackTop.value]);
+                return mkErr(LLParseError.SgErr4, [stackTop.value.repr]);
             }
             const ruleEntry = rowEntry.get(curToken.id);
             if (!ruleEntry){
                 // no entry in the table for symbol and terminal
-                return mkErr(LLParseError.SgErr5, [stackTop.value, curToken]);
+                return mkErr(LLParseError.SgErr5, [stackTop.value.repr, curToken.repr]);
             }
             const ruleID = ruleEntry.values().next().value;
             return mkOK({type: cmdType.REPL, symbol: ruleID});

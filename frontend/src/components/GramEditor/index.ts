@@ -18,6 +18,7 @@ export default class GramEdtior extends Vue {
     nterms: Symbl[] = [];
     terms: Symbl[] = [];
     emptySymbol: Symbl = {id: -1, repr: '~'};
+    eofSymbol: Symbl = {id: -1, repr: '$'};
 
     UIText = lang.gLang.EditorText;
 
@@ -94,6 +95,7 @@ export default class GramEdtior extends Vue {
         this.terms = [... mTerms.values()];
         this.nterms = [... mNterms.values()];
         this.emptySymbol.id = symblID++;
+        this.eofSymbol.id = symblID++;
 
         // bundle grammar and set it
         const g: Grammar = {
@@ -101,6 +103,7 @@ export default class GramEdtior extends Vue {
             nterms: this.nterms,
             rules: rules,
             emptySymbol: this.emptySymbol,
+            eofSymbol: this.eofSymbol,
             startSymbol: startSymbol,
             maxSymbolID: symblID,
         }

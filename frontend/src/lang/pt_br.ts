@@ -63,7 +63,23 @@ const UIText: UITextS = {
          lblInputS: 'Entrada:',
          lblRules: 'Regras:',
          lblCmdH: 'Histórico de Comandos:',
-         lblCmd: 'Comando:'
+         lblCmd: 'Comando:',
+         machine: {
+            NoError: 'não há erro',
+            InvalidRule: (r: str) => `regra ${r} não encontrada`,
+            eofIS: 'não é possível aplicar comandos quando a cadeia esgotou-se',
+            AcReplErr: 'não foi possível executar a ação de substituir',
+            AcReplErr1: (t: str) => `topo da pilha ${mc(t)} não é um não-terminal`,
+            AcReplErr2: (t: str, s: str) => `topo da pilha ${mc(t)} não casa com o não-terminal ${mc(s)} do lado esquerdo da regra`,
+            AcMatchErr1: (t: str, s: str) => `tentativa de casar o token "${mc(t)}" da entrada com o não terminal do topo da pilha "${mc(s)}"`,
+            AcMatchErr2: (t: str, s: str) => `tentativa de casar o token "${mc(t)}" da cadeia de entrada com um diferente ("${mc(s)}") presente no topo da pilha`,
+            SgCant: 'não foi possível encontrar sugestão',
+            SgErr1: 'não há tabela de análise disponível',
+            SgErr2: 'nenhuma ação pode ser realizada quando a pilha está vazia',
+            SgErr3: () => UIText.LLSim.machine.SgCant + '. Nenhuma regra de casamento pode ser aplicada quando a entrada está totalmente consumida',
+            SgErr4: (t: str) => UIText.LLSim.machine.SgCant + `. Não há linha na tabela de análise para o não-terminal ${mc(t)}`,
+            SgErr5: (t: str, s: str) => UIText.LLSim.machine.SgCant + `Não há entrada na tabela de análise para o não-terminal "${mc(t)}" e o token atual "${mc(s)}"`
+         }
     }
 }
 

@@ -63,7 +63,22 @@ const UIText: UITextS = {
          lblInputS: 'Input Stream:',
          lblRules: 'Rules:',
          lblCmdH: 'Command History:',
-         lblCmd: 'Command:'
+         lblCmd: 'Command:',
+         machine: {
+            NoError: 'no error',
+            InvalidRule: (r: str) => `rule ${r} not found`,
+            eofIS: 'cannot apply command when end of input is reached',
+            AcReplErr1: (t: str) => `top of stack ${mc(t)} is not a non-terminal`,
+            AcReplErr2: (t: str, s: str) => `top of stack ${mc(t)} doesn't match rule lefthand side symbol ${mc(s)}`,
+            AcMatchErr1: (t: str, s: str) => `attempt to match the token "${mc(t)}" of input stream where top of stack the non-terminal  ${mc(s)}`,
+            AcMatchErr2: (t: str, s: str) => `attempt to match a token "${mc(t)}" of input stream where top of stack is a different ("${mc(s)}") one`,
+            SgCant: 'can\'t provide any suggestion',
+            SgErr1: 'no parse table is available',
+            SgErr2: 'no action can be performed when stack is empty',
+            SgErr3: () => UIText.LLSim.machine.SgCant + '. No match rule can be applied when input stream is totally consumed',
+            SgErr4: (t: str) => UIText.LLSim.machine.SgCant + `. No row entry in parsing table exist for the non-terminal ${mc(t)}`,
+            SgErr5: (t: str, s: str) => UIText.LLSim.machine.SgCant + `No entry in the parsing table for non-terminal "${mc(t)}" and current token "${mc(s)}"`
+         }
     }
 }
 

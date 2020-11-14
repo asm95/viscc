@@ -1,7 +1,7 @@
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
 import { PropType } from 'vue'
 
-import { LLSimInputCommand, cmdType, ParseSimulator, RenderResponseMessage, Rule, itemType } from '@/sim/ll1'
+import { LLSimInputCommand, cmdType, ParseSimulator, RenderResponseMessage, Rule, itemType, Symbl } from '@/sim/ll1'
 import ComponentTelemetry from './telemetry'
 import lang from '@/lang';
 
@@ -122,14 +122,13 @@ export default class Simulator extends Vue {
         return makeOK('');
     }
 
-    displayCommand(cmd: LLSimInputCommand): DisplayableElement{
+    displayCommand(cmd: LLSimInputCommand, token: Symbl): DisplayableElement{
         // generate display property for a user command
         let outString = '';
         if (cmd.type == cmdType.REPL){
             outString = this.uiText.commandRepl(cmd.keyID+1);
         } else if (cmd.type == cmdType.MATCH){
-            const token = this.simulator.grammar.tokens.find(i => i.id == cmd.keyID) || '&lt;unk&gt;';
-            outString = this.uiText.commandMatch(token);
+            outString = this.uiText.commandMatch(token.repr);
         } else {
             outString = this.uiText.unkCommand;
         }
@@ -200,7 +199,8 @@ export default class Simulator extends Vue {
             // means either parsing table is not set or no command can be applied
             return;
         } else {
-            this.userStatus.display = this.uiText.nextSuggestion(this.displayCommand(nextCmd.value).display);
+            const de = this.displayCommand(nextCmd.value, this.simulator.getCurrentToken());
+            this.userStatus.display = this.uiText.nextSuggestion(de.display);
         }
     }
 
@@ -212,6 +212,7 @@ export default class Simulator extends Vue {
         const userInput = this.curInput;
         const sim = this.simulator;
         const cmd = parseCommand(userInput);
+        const token = this.simulator.getCurrentToken();
         let simEnded = false;
         if (! cmd){
             // input is invalid, let's warn the user
@@ -235,7 +236,7 @@ export default class Simulator extends Vue {
                 } else {
                     // successful command
                     // add to command history
-                    this.commandHistory.push(this.displayCommand(cmd));
+                    this.commandHistory.push(this.displayCommand(cmd, token));
                     // we have to update entire UI if some special
                     // . condition has reached
                     const status = this.updateValidState();
@@ -255,6 +256,7 @@ export default class Simulator extends Vue {
                         this.updateSuggestions();
                         }
                     }
+                    this.updateStack();
                     this.updateInputStream();
                     // also clear the input
                     this.curInput = '';
@@ -272,13 +274,9 @@ export default class Simulator extends Vue {
         const s = this.simulator.stack;
         const sz = s.size();
         const sv = this.stackContent; // sv = stack view
-        if (sz > sv.length){
-            // element pushed
-            const e = s.getTop();
-            sv.push({display: e ? e.value.repr : '??'});
-        } else if (sz < sv.length) {
-            sv.pop();
-        }
+        this.stackContent = s.s.map(e => {
+            return {display: e.value.repr}
+        });
     }
 
     private onReset (){
@@ -287,6 +285,7 @@ export default class Simulator extends Vue {
         if (inputStream.length == 0){
             this.inputStream = updateDE(uiNoInput);
         } else {
+            inputStream.push(this.simulator.grammar.eofSymbol);
             inputDisplay = inputStream.map(i => i.repr).join('');
             this.inputStream = {display: inputDisplay}
             this.updateInputStream();

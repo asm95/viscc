@@ -3,7 +3,6 @@ import { PropType } from 'vue'
 
 import lang from '@/lang/index'
 import {L1Sim, Symbl, Grammar, Rule} from '@/sim/ll1'
-import AppControl from '@/manage/app'
 
 interface FsDisplay {
     symbol: string;

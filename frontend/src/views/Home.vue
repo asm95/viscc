@@ -76,9 +76,11 @@ export default class Home extends Vue {
   }
 
   private getEmptyGrammar(): Grammar {
+    const nullS = {id: -1, repr: ''};
     const g: Grammar = {
       tokens: [], nterms: [], rules: [],
-      emptySymbol: {id: -1, repr: ''}, startSymbol: {id: -1, repr: ''},
+      emptySymbol: nullS, startSymbol: nullS,
+      eofSymbol: nullS,
       maxSymbolID: 1
     }
     return g;
