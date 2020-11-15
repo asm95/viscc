@@ -21,6 +21,7 @@ export default class MainConfig extends Vue {
     availLanguages: LangInfo[];
     uiText = gLang.uiText.MainConfig;
     reloadAppText = '';
+    acceptPrivacy = AppC.conf.acceptPrivacy;
 
     requestAppReload(toggle: boolean){
         if (toggle){
@@ -34,7 +35,12 @@ export default class MainConfig extends Vue {
     }
 
     onCloseBtnClick(){
+        AppC.saveSettings();
         this.$emit('close');
+    }
+
+    onPrivacyCbToggle(){
+        AppC.conf.acceptPrivacy = this.acceptPrivacy;
     }
 
     onLangSet(ev: Event) {

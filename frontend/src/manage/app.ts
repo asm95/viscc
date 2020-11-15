@@ -4,10 +4,12 @@ import { LangCode } from '@/lang'
 
 interface AppSettings {
     langCode: LangCode;
+    acceptPrivacy: boolean;
 }
 
 const defaultSettings: AppSettings = {
-    langCode: LangCode.enUS
+    langCode: LangCode.enUS,
+    acceptPrivacy: true
 }
 
 
@@ -32,7 +34,9 @@ class AppController {
         const ds = defaultSettings;
         try{
             const val = JSON.parse(ls.getItem(key) || '{}') as AppSettings;
+            console.log(val);
             if (typeof val.langCode == "undefined"){val.langCode = ds.langCode;}
+            if (typeof val.acceptPrivacy == "undefined"){val.acceptPrivacy = ds.acceptPrivacy;}
             return val;
         } catch (e){
             this.loadFailed = true;

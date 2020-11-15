@@ -12,6 +12,13 @@
                 </select>
             </div>
             <div>
+                <p class="secTitle">{{uiText.lblPrivacy}}</p>
+                <label class="checkbox">
+                    <input @change="onPrivacyCbToggle" v-model="acceptPrivacy" type="checkbox">
+                    {{uiText.cbTextPrivacy}}
+                </label>
+            </div>
+            <div>
                 <div v-if="reloadAppText" class="textSmall">
                     <i>{{reloadAppText}}</i> (<a @click="onReloadAppBtnClick">{{uiText.btnRestartNow}}</a>)
                 </div>
@@ -33,5 +40,8 @@ export default MainConfig;
     }
     .textSmall {
         font-size: small;
+    }
+    .secTitle{
+        font-weight: 700;
     }
 </style>
