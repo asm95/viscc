@@ -8,10 +8,8 @@ type int = number;
 const rpw1 = (c: int) => (c>1) ? 'elementos' : 'elemento';
 
 const UIText: UITextS = {
+    langTitle: 'Português Brasileiro',
     version: v => `Versão ${v}`,
-    about: {
-        me: 'olá'
-    },
     GEditor: {
         badRule: 'Regra Inválida',
         lblEnterGrammar: 'Digite a gramática...',
@@ -98,6 +96,22 @@ const UIText: UITextS = {
             SgErr4: (t: str) => UIText.LLSim.machine.SgCant + `. Não há linha na tabela de análise para o não-terminal ${mc(t)}`,
             SgErr5: (t: str, s: str) => UIText.LLSim.machine.SgCant + `Não há entrada na tabela de análise para o não-terminal "${mc(t)}" e o token atual "${mc(s)}"`
          }
+    },
+    MainConfig: {
+        lblTitle: 'Configurações',
+        lblLang: 'Língua de Interface:',
+        lblPrivacy: 'Privacidade',
+        lblUI: 'Interface de Usuário',
+        cbTextPrivacy: 'Eu concordo em enviar dados de uso segundo descrito nos Termos de Serviço.',
+        lblInfo1: 'Alterações são salvas automaticamente',
+        lblUpdatP: 'Salvando alterações...',
+        lblUpdatOK: 'Alterações foram registradas',
+        lblUpdatNOK: 'Alterações não puderam ser registradas',
+        lblSimulation: 'Simulação',
+        cbTextEnableSuggestions: 'Habilitar sugestões enquanto simula',
+        cbTextEnableMoboVer: 'Habilitar versão móvel',
+        lblAppRestartInfo: 'Mudanças serão aplicadas após reinicialização deste aplicativo',
+        btnRestartNow: 'reiniciar agora'
     }
 }
 

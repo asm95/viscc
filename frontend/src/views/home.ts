@@ -2,10 +2,12 @@ import { Component, Vue } from 'vue-property-decorator';
 import GEditor from '@/components/GramEditor/GramEditor.vue';
 import LL1Info from '@/components/SimLL1/LL1Info.vue';
 import LL1Sim from '@/components/SimLL1/LL1Sim.vue';
+import MainConfig from '@/components/Config/MainConfig.vue';
 
 import Tree from '@/components/Graph/tree';
 
-import lang from '../lang/index'
+import lang, { gLang } from '../lang/index'
+import Icons from '@/components/icons'
 
 import {Settings as SimSettings} from '@/components/SimLL1/simulator';
 import { Grammar, L1Sim, ParseSimulator, LL1ParseTable, Symbl } from '../sim/ll1';
@@ -13,7 +15,8 @@ import { Grammar, L1Sim, ParseSimulator, LL1ParseTable, Symbl } from '../sim/ll1
 
 @Component({
   components: {
-    LL1Info, LL1Sim, GEditor, Tree
+    MainConfig, LL1Info, LL1Sim, GEditor, Tree,
+    Gear: Icons.Gear
   },
 })
 export default class Home extends Vue {
@@ -25,7 +28,9 @@ export default class Home extends Vue {
   tokensMap: Map<string, Symbl>;
   inputString = '';
   errMsg = '';
-  uiText: any = lang.gLang.uiText.LLView;
+  uiText = lang.gLang.uiText.LLView;
+
+  showConfigBox = false;
 
   onEditorGrammarSet (g: Grammar){
     this.grammar = g;
@@ -66,6 +71,22 @@ export default class Home extends Vue {
     const sim = new ParseSimulator(inputStream, this.grammar);
     sim.pareseTable = this.parseTable;
     this.parseSimulator = sim;
+  }
+
+  onLanguageSet(){
+    console.log('changed');
+    this.$forceUpdate();
+    console.log(this.uiText);
+    console.log(gLang.uiText.LLView);
+    console.log(this.uiText.LLView === gLang.uiText);
+  }
+
+  onConfigBoxClose(){
+    this.showConfigBox = false;
+  }
+
+  onConfigBtnClick(){
+    this.showConfigBox = true;
   }
 
   private getEmptyGrammar(): Grammar {

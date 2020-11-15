@@ -8,10 +8,8 @@ type int = number;
 const rpw1 = (c: number) => (c>1) ? 'elements' : 'element';
 
 const UIText: UITextS = {
+    langTitle: 'English',
     version: v => `Version ${v}`,
-    about: {
-        me: 'hello'
-    },
     GEditor: {
         badRule: 'Invalid rule',
         lblEnterGrammar: 'Enter grammar...',
@@ -97,6 +95,22 @@ const UIText: UITextS = {
             SgErr4: (t: str) => UIText.LLSim.machine.SgCant + `. No row entry in parsing table exist for the non-terminal ${mc(t)}`,
             SgErr5: (t: str, s: str) => UIText.LLSim.machine.SgCant + `No entry in the parsing table for non-terminal "${mc(t)}" and current token "${mc(s)}"`
          }
+    },
+    MainConfig: {
+        lblTitle: 'Settings',
+        lblLang: 'Display Language:',
+        lblPrivacy: 'Privacy',
+        lblUI: 'User Interface',
+        cbTextPrivacy: 'I agree to send usage data according to the Terms of Service.',
+        lblInfo1: 'Changes are saved automatically',
+        lblUpdatP: 'Saving changes...',
+        lblUpdatOK: 'Changes were saved',
+        lblUpdatNOK: 'Changes couldn\'t be saved',
+        lblSimulation: 'Simulation',
+        cbTextEnableSuggestions: 'Enable simulation suggestions',
+        cbTextEnableMoboVer: 'Enable mobile version',
+        lblAppRestartInfo: 'Changes will be applied after this application reload',
+        btnRestartNow: 'restart now'
     }
 }
 
