@@ -2,14 +2,8 @@ import { Vue, Component } from 'vue-property-decorator';
 import {Symbl, Grammar, Rule} from '@/sim/ll1'
 import lang from '@/lang/index'
 
-import Icons from '@/components/icons';
 
-
-@Component({
-    components: {
-        Gear: Icons.Gear
-    }
-})
+@Component({})
 export default class GramEdtior extends Vue {
     inputGram = '';
     errorMsg = '';

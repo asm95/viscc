@@ -112,6 +112,18 @@ const UIText: UITextS = {
         cbTextEnableMoboVer: 'Habilitar versão móvel',
         lblAppRestartInfo: 'Mudanças serão aplicadas após reinicialização deste aplicativo',
         btnRestartNow: 'reiniciar agora'
+    },
+    App: {
+        lblHome: 'Início',
+        lblAbout: 'Sobre',
+        lblLogin: 'Login',
+        lblRegister: 'Registrar',
+        Login: {
+            lblLogin: 'Login',
+            lblUser: 'Usuário',
+            lblPassword: 'Senha',
+            btnSubmit: 'Enviar'
+        }
     }
 }
 

@@ -6,6 +6,7 @@ export interface UITextS {
     LLView: any;
     LLSim: any;
     MainConfig: any;
+    App: any;
 }
 
 export class TextMarkup {

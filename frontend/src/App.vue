@@ -1,8 +1,7 @@
 <template>
   <div id="app">
     <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+      <Topbar/>
     </div>
     <router-view/>
   </div>
@@ -21,3 +20,17 @@
   /*align; c = container, tar = text align right*/
   .ct.tar{text-align: right;}
 </style>
+
+<script >
+import { Vue, Component } from 'vue-property-decorator'
+
+import Topbar from '@/components/App/Topbar.vue'
+
+
+@Component({
+  components: {Topbar}
+})
+export default class App extends Vue {
+
+}
+</script>

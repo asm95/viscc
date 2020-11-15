@@ -1,6 +1,5 @@
 <template>
     <div>
-        <Gear style="color:red;" width="32px" />
         <textarea :placeholder="uiText.lblEnterGrammar" v-model="inputGram" class="textarea" rows="5"/>
         <p v-if="errorMsg" class="msgErr">{{errorMsg}}</p>
         <div class="tar btnSubmit">
