@@ -129,6 +129,9 @@ const UIText: UITextS = {
             lblName: 'Nome',
             lblID: 'ID',
             lblFieldInfo: 'Este campo é preenchido automaticamente'
+        },
+        About: {
+            textThanks: 'Agradecemos pelo apoio de ...'
         }
     }
 }

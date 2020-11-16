@@ -128,6 +128,9 @@ const UIText: UITextS = {
             lblName: 'Name',
             lblID: 'ID',
             lblFieldInfo: 'This field is assigned automatically'
+        },
+        About: {
+            textThanks: 'We thank the support by ...'
         }
     }
 }
