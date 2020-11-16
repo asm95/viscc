@@ -122,6 +122,12 @@ const UIText: UITextS = {
             lblUser: 'User',
             lblPassword: 'Password',
             btnSubmit: 'Submit'
+        },
+        User: {
+            lblProfile: 'Profile',
+            lblName: 'Name',
+            lblID: 'ID',
+            lblFieldInfo: 'This field is assigned automatically'
         }
     }
 }

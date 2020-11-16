@@ -123,6 +123,12 @@ const UIText: UITextS = {
             lblUser: 'Usuário',
             lblPassword: 'Senha',
             btnSubmit: 'Enviar'
+        },
+        User: {
+            lblProfile: 'Perfil',
+            lblName: 'Nome',
+            lblID: 'ID',
+            lblFieldInfo: 'Este campo é preenchido automaticamente'
         }
     }
 }
