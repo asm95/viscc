@@ -1,0 +1,4 @@
+# serve our website with Flask
+Flask==1.1.2
+# ORM with sqlalchemy
+SQLAlchemy==1.3.20
