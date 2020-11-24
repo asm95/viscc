@@ -111,7 +111,9 @@ const UIText: UITextS = {
         cbTextEnableSuggestions: 'Habilitar sugestões enquanto simula',
         cbTextEnableMoboVer: 'Habilitar versão móvel',
         lblAppRestartInfo: 'Mudanças serão aplicadas após reinicialização deste aplicativo',
-        btnRestartNow: 'reiniciar agora'
+        btnRestartNow: 'reiniciar agora',
+        btnSave: 'Salvar',
+        btnDiscard: 'Descartar'
     },
     App: {
         lblHome: 'Início',
@@ -122,13 +124,15 @@ const UIText: UITextS = {
             lblLogin: 'Login',
             lblUser: 'Usuário',
             lblPassword: 'Senha',
-            btnSubmit: 'Enviar'
+            btnSubmit: 'Enviar',
+            msgLoginFailed: 'O login falhou'
         },
         User: {
             lblProfile: 'Perfil',
             lblName: 'Nome',
             lblID: 'ID',
-            lblFieldInfo: 'Este campo é preenchido automaticamente'
+            lblFieldInfo: 'Este campo é preenchido automaticamente',
+            lblLogout: 'Sair'
         },
         About: {
             textThanks: 'Agradecemos pelo apoio de ...'

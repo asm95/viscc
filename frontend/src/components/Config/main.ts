@@ -2,6 +2,7 @@ import { Vue, Component } from 'vue-property-decorator'
 
 import {LangCode, gLang} from '@/lang'
 import AppC from '@/manage/app'
+import {UserA} from '@/manage/api'
 
 import icon from '@/components/icons'
 
@@ -21,7 +22,13 @@ export default class MainConfig extends Vue {
     availLanguages: LangInfo[];
     uiText = gLang.uiText.MainConfig;
     reloadAppText = '';
+    savingAppText = '';
     acceptPrivacy = AppC.conf.acceptPrivacy;
+
+    btnSaveDisabled = true;
+    btnDiscardDisabled = true;
+
+    remoteSaveError = false;
 
     requestAppReload(toggle: boolean){
         if (toggle){
@@ -41,6 +48,40 @@ export default class MainConfig extends Vue {
 
     onPrivacyCbToggle(){
         AppC.conf.acceptPrivacy = this.acceptPrivacy;
+        this.onConfigChanged();
+    }
+
+    onConfigChanged(){
+        this.btnSaveDisabled = false;
+        this.btnDiscardDisabled = false;
+    }
+
+    requestOnlineSave(){
+        const userApi = new UserA();
+        userApi.pushChanges((r) => {
+            if (!r.ok){
+                this.savingAppText = this.uiText.lblUpdatNOK;
+                this.remoteSaveError = true;
+            } else {
+                this.savingAppText = this.uiText.lblUpdatOK;
+                this.remoteSaveError = false;
+            }
+        });
+    }
+
+    onSaveBtnClick(){
+        // disable UI while saving
+        this.btnSaveDisabled = true;
+        this.btnDiscardDisabled = true;
+        this.savingAppText = this.uiText.lblUpdatP;
+        this.requestOnlineSave();
+        // also save changes locally
+        AppC.saveSettings();
+    }
+    
+    onDiscardBtnClick(){
+        // only reload window
+        window.location.reload();
     }
 
     onLangSet(ev: Event) {
@@ -49,6 +90,7 @@ export default class MainConfig extends Vue {
         this.uiText = gLang.uiText.MainConfig;
         AppC.conf.langCode = langID;
         this.requestAppReload(true);
+        this.onConfigChanged();
     }
 
     constructor(){

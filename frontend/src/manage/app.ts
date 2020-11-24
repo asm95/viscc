@@ -2,14 +2,26 @@ import Vue from 'vue'
 
 import { LangCode } from '@/lang'
 
+interface LoggedUser {
+    isLogged: boolean;
+    prettyName: string;
+    orgID: string;
+}
+
 interface AppSettings {
     langCode: LangCode;
     acceptPrivacy: boolean;
+    userProfile: LoggedUser;
 }
 
 const defaultSettings: AppSettings = {
     langCode: LangCode.enUS,
-    acceptPrivacy: true
+    acceptPrivacy: true,
+    userProfile: {
+        isLogged: false,
+        prettyName: 'Unmaed User',
+        orgID: '000'
+    }
 }
 
 
@@ -33,15 +45,21 @@ class AppController {
         const key = `${this.appID}:conf`;
         const ds = defaultSettings;
         try{
-            const val = JSON.parse(ls.getItem(key) || '{}') as AppSettings;
+            const val = JSON.parse(ls.getItem(key) || '') as AppSettings;
             console.log(val);
             if (typeof val.langCode == "undefined"){val.langCode = ds.langCode;}
             if (typeof val.acceptPrivacy == "undefined"){val.acceptPrivacy = ds.acceptPrivacy;}
             return val;
         } catch (e){
+            this.conf = Object.assign({}, defaultSettings);
             this.loadFailed = true;
         }
         return defaultSettings;
+    }
+
+    logoutUser () {
+        this.conf.userProfile = Object.assign({}, defaultSettings.userProfile);
+        this.saveSettings();
     }
 
     setApp(app: Vue){

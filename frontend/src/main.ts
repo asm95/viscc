@@ -13,7 +13,14 @@ Lang.gLang.setLang(AppC.conf.langCode)
 
 const app = new Vue({
   router,
-  render: h => h(App)
+  render: h => h(App),
+  mounted (){
+    if (! AppC.loadFailed && AppC.conf.userProfile.isLogged){ 
+      // emit logged user info
+      this.$emit('onUserLogged')
+    }
+  }
+
 }).$mount('#app')
 
 AppC.setApp(app)

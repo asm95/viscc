@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 
 from common.flask import (
-    load_config, app_runner, app_register_jinja_extras, app_register_routes
+    load_config, app_runner, app_register_routes
 )
 from common.util import lapply
 from common.globals import G_ENV
@@ -39,7 +39,6 @@ def bootstrap_app():
             # more views can be injected here
         ], func_args=app
     )
-    app_register_jinja_extras(app, config)
 
 
 def run_app():

@@ -2,6 +2,8 @@ import { Vue, Component } from 'vue-property-decorator'
 
 import MainConfig from '@/components/Config/MainConfig.vue'
 import {gLang} from '@/lang'
+import AppM from '@/manage/app'
+
 
 @Component({
     components: {MainConfig}
@@ -25,6 +27,10 @@ export default class UserProfile extends Vue {
 
     mounted (){
         const el = this.$refs['userPicture'];
-        console.log(el);
+    }
+
+    constructor (){
+        super();
+        this.userName = AppM.conf.userProfile.prettyName;
     }
 }

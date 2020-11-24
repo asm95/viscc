@@ -227,21 +227,11 @@ def app_register_routes(app: Flask, views: list):
         app.add_url_rule(view.func.route, view.endpoint, view, methods=view.func.methods)
 
 
-def app_register_jinja_extras(app: Flask, config: dict):
-    jin_globals = app.jinja_env.globals
-
-    # includes a file without attempting to parse as a template
-    jin_globals['include_raw'] = lambda filename: Markup(
-        app.jinja_loader.get_source(app.jinja_env, filename)[0]
-    )
-
-    # includes a file that is hosted in a CDN
-    cdn_prefix = config.get('CDN_HOST')
-    static_s_fn = lambda fp: url_for('vw_serve_static', file_path=fp)
-    cdn_s_fn = lambda fp: cdn_prefix + '/' + fp
-    jin_globals['cdn_serve'] = cdn_s_fn if \
-        config.get('USE_CDN', False) else static_s_fn
-    jin_globals['static_serve'] = static_s_fn
+def _use_cors(res: Response):
+    res.headers['Access-Control-Allow-Origin'] = '*'
+    res.headers['Access-Control-Allow-Methods'] = 'GET, POST'
+    res.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    return res
 
 
 def app_runner(app: Flask, config: dict):
@@ -253,6 +243,8 @@ def app_runner(app: Flask, config: dict):
             sk.min, sk.max,
         ))
         exit(1)
+    if config.get('APP_ALLOW_CORS'):
+        app.after_request(_use_cors)
     app.run(
         host=config.get('APP_HOST'),
         port=config.get('APP_PORT'),

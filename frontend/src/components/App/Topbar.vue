@@ -5,7 +5,10 @@
         <router-link to="/about">{{uiText.lblAbout}}</router-link>
         <span class="userBlock">
             <span v-if="loggedUser">
-                NamedUser
+                <router-link to="/user" class="userName">{{cropUserName(userName)}}</router-link>
+                <svg class="userProfile" ref="userPicture">
+                    <text x="50%" y="70%" text-anchor="middle" class="avatarText">{{getUserCapital(userName)}}</text>
+                </svg>
             </span>
             <span v-else>
                 <router-link to="/login">{{uiText.lblLogin}}</router-link> |
@@ -45,5 +48,18 @@ export default Topbar;
         font-weight: bold;
         font-size: x-large;
         padding-right: 1em;
+    }
+
+    .userProfile {
+        width: 32px;
+        height: 32px;
+        background: #d8d8d8;
+        border-radius: 50%;
+        margin-left: 1em;
+        margin-top: 0.25em;
+    }
+    .userName {
+        display: inline-block;
+        transform: translate(0, -8px);
     }
 </style>
