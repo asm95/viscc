@@ -22,15 +22,13 @@ export default class Login extends Vue {
         this.errMsg = this.uiText.msgLoginFailed
       } else {
         // update local user data
-        const conf = AppM.conf;
-        const profile = conf.userProfile;
         const remoteData = r.data;
         const prefs = remoteData.prefs;
-        profile.prettyName = remoteData.prettyName;
-        profile.isLogged = true;
-        conf.acceptPrivacy = prefs.acceptPrivacy;
-        conf.langCode = prefs.langCode;
+        prefs.userProfile.isLogged = true;
+        AppM.conf = prefs;
         AppM.saveSettings();
+        AppM.setAuthToken(remoteData.auth_token);
+        AppM.appLoadSettings();
         this.$root.$emit('onUserLogged');
         router.push({name: 'User'});
       }

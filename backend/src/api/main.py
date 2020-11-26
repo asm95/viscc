@@ -1,4 +1,3 @@
-import os
 from typing import Any
 from datetime import datetime as dt, timedelta
 
@@ -7,6 +6,9 @@ from flask import request, jsonify
 
 from common.flask import View
 from common.util import unpack
+from models.user import (
+    UserSettings, usr_get_from_creds, usr_bake_token, usr_check_token, usr_unpack_prefs, usr_save_prefs
+)
 
 
 class Response(object):
@@ -24,7 +26,7 @@ class Response(object):
 
 
 def get_json_contents(schema: dict) -> Response:
-    in_json = request.json
+    in_json = request.json or dict()
     parsed = dict()
     if in_json is None and schema:
         return Response(ok=False, msg='empty request')
@@ -49,14 +51,31 @@ def get_json_contents(schema: dict) -> Response:
     return Response(ok=True, data=parsed)
 
 
+def require_login(f):
+    def wrap(*args, **kwargs):
+        self = args[0]  # type: ApiView
+        in_json = request.json or dict()
+        auth_token = in_json.pop('authToken', '')
+        token_data = usr_check_token(auth_token)
+        kwargs['token_data'] = token_data
+        if not token_data:
+            return self.api_res(Response(ok=False, msg='invalid auth-token'))
+        return f(*args, **kwargs)
+    return wrap
+
+
 class G(object):
-    usr_default_settings = {
-        'langCode': 0,
-        'acceptPrivacy': False
-    }
+    usr_default_settings: str = UserSettings.default()
 
 
-class UserAPI(View):
+class ApiView(View):
+    @staticmethod
+    def api_res(res: Response):
+        res = jsonify(res.as_dict())
+        return res
+
+
+class UserAPI(ApiView):
     """
     Conventions:
         vw_* = view function - renders a response that contains a page that will be consumed by the client (HTML)
@@ -69,19 +88,18 @@ class UserAPI(View):
     name = 'UserAPI'
     mount = '/api/user'
 
-    def api_res(self, res: Response, cookies: dict = None):
-        res = jsonify(res.as_dict())
-        if cookies:
-            for k, v in cookies.items():
-                self.cookies.set(res, k, v)
-        return res
-
     @View.route('/info', method='post')
-    def rt_info(self, ):
-        in_data = request.json
+    @require_login
+    def rt_info(self, token_data: dict):
+        new_prefs = request.json.get('data')
+        user_id = int(token_data.get('uid', '-1'))
         # for now, just believe in what the client is saying
-        print('asked for save')
-        print('request headers %s' % str(request.headers))
+        if not new_prefs:
+            return self.api_res(Response(ok=False, msg='invalid preferences'))
+        if user_id < 0:
+            return self.api_res(Response(ok=False, msg='invalid user ID'))
+        if not usr_save_prefs(user_id, new_prefs):
+            return self.api_res(Response(ok=False, msg='failed to save preferences'))
         return self.api_res(Response())
 
     @View.route('/login', method='post')
@@ -92,12 +110,13 @@ class UserAPI(View):
         if not in_data.ok:
             return self.api_res(in_data)
         user, pwd = unpack(in_data.data, ('usr', 'pwd'))
-        if user == 'admin' and pwd == '123':
+        usr_info = usr_get_from_creds(user, pwd)
+        if usr_info:
             res = Response(data={
-                'prettyName': 'Admin',
-                'prefs': G.usr_default_settings
+                'auth_token': usr_bake_token(usr_info),
+                'prefs': usr_unpack_prefs(usr_info)
             })
-            return self.api_res(res, cookies={'token': 'abc'})
+            return self.api_res(res)
 
         return self.api_res(Response(ok=False, msg='invalid user'))
 

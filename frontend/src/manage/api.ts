@@ -1,14 +1,14 @@
 
-import axios from 'axios';
+import axios from 'axios'
 
 import AppM from '@/manage/app'
 
 
 // axios instance
+const apiHost = document.location.host.replace('8080', '8081')
 const apiIns = axios.create({
-    baseURL: 'http://localhost:8081',
+    baseURL: `http://${apiHost}`,
 })
-
 const baseRoute = '/api'
 
 interface APIResponse {
@@ -39,7 +39,8 @@ export class UserA {
     pushChanges(cb: APICallback){
         // send configuration data to server
         apiIns.post(`${baseRoute}/user/info`, {
-            action: 'save', data: AppM.conf
+            action: 'save', data: AppM.conf,
+            authToken: AppM.getAuthToken()
         })
         .then((r) => {
             const d = r.data as APIResponse;

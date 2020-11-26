@@ -3,13 +3,10 @@ import App from './App.vue'
 import router from './router'
 
 import AppC from '@/manage/app'
-import Lang from '@/lang'
-
 
 Vue.config.productionTip = false
 
-AppC.conf = AppC.loadSettings()
-Lang.gLang.setLang(AppC.conf.langCode)
+AppC.appLoadSettings()
 
 const app = new Vue({
   router,

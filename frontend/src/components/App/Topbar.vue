@@ -26,7 +26,7 @@ export default Topbar;
 
 <style lang="scss" scoped>
     .topBar {
-        height: 5vh;
+        height: 40px;
         background: #5e7272;
         color: white;
 

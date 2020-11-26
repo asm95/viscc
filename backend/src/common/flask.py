@@ -6,11 +6,12 @@ from flask import (
     Flask, request, abort, render_template, url_for, send_from_directory
 )
 from flask.wrappers import Response
-from jinja2 import Markup
 
 from common.dotenv import DotEnv
-from common.util import value_or_not, DictObject
+from common.util import DictObject
 from common.config import ConfigRequirements, Config
+from common.globals import AppGlobals, G_ENV
+from models.main import DBManager
 
 __version__ = '0.0.3'
 
@@ -234,6 +235,14 @@ def _use_cors(res: Response):
     return res
 
 
+def app_load_db() -> dict:
+    db_name = G_ENV.get('APP_DB_NAME', 'app')
+    db_file_name = '{name}.{ext}'.format(name=db_name, ext='db')
+    db_path = os.path.join('etc', db_file_name)
+    AppGlobals.dbm = DBManager(db_path)
+    return {'ok': True, 'exists': os.path.isfile(db_path)}
+
+
 def app_runner(app: Flask, config: dict):
     app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix=config.get('APP_BASE_URL', ''))
     app.secret_key = config.get('APP_SECRET_KEY')
@@ -245,6 +254,9 @@ def app_runner(app: Flask, config: dict):
         exit(1)
     if config.get('APP_ALLOW_CORS'):
         app.after_request(_use_cors)
+    app_load_db()
+    AppGlobals.dbm.connect()
+    AppGlobals.master_key = app.secret_key
     app.run(
         host=config.get('APP_HOST'),
         port=config.get('APP_PORT'),

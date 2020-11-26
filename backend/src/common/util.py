@@ -1,3 +1,5 @@
+import os
+import json
 from typing import Union, Iterable, Callable
 
 
@@ -48,3 +50,25 @@ class DictObject(dict):
     __getattr__ = dict.get
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
+
+
+class AppData(object):
+    encoding = 'utf-8'
+
+    def load(self, raise_err: str = '') -> 'AppData':
+        if not os.path.isfile(self.file_path):
+            if 'f' in raise_err:
+                raise ValueError('path for file "%s" must exist' % (self.file_path, ))
+            return self
+        with open(self.file_path, mode='r', encoding=self.encoding) as f:
+            self.store = json.load(f)
+        return self
+
+    def save(self, ) -> 'AppData':
+        with open(self.file_path, mode='w', encoding=self.encoding) as f:
+            json.dump(f, self.store, ensure_ascii=False)
+        return self
+
+    def __init__(self, file_path: str):
+        self.file_path = file_path
+        self.store = dict()

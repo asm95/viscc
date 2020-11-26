@@ -23,7 +23,7 @@
             </div>
         </div>
         <div>
-            <MainConfig/>
+            <MainConfig ref="config"/>
         </div>
     </div>
 </template>

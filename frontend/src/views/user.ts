@@ -10,6 +10,7 @@ import {gLang} from '@/lang'
 })
 export default class UserPage extends Vue {
     loggedUser = false;
+    userName = 'Adam';
     uiText = gLang.uiText.App.User;
 
     onLogoutBtnClick(){

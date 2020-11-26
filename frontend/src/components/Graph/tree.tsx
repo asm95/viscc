@@ -2,6 +2,6 @@ import Vue from 'vue';
 
 export default Vue.extend({
      render (){
-         return <div>Hello World!</div>
+         return <div></div>
      }
 });

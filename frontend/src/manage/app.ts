@@ -1,6 +1,6 @@
 import Vue from 'vue'
 
-import { LangCode } from '@/lang'
+import Lang, { LangCode } from '@/lang'
 
 interface LoggedUser {
     isLogged: boolean;
@@ -28,6 +28,7 @@ const defaultSettings: AppSettings = {
 class AppController {
     private app: Vue | null;
     private appID: string;
+    private authToken = '';
     conf: AppSettings;
     saveSupported: boolean;
     loadFailed = false;
@@ -39,7 +40,18 @@ class AppController {
         ls.setItem(key, JSON.stringify(this.conf));
     }
 
-    loadSettings (): AppSettings {
+    setAuthToken(newAuth: string){
+        if (!this.isSaveSupported){return;}
+        const ls = window.localStorage;
+        const key = `${this.appID}:authToken`;
+        this.authToken = newAuth;
+        ls.setItem(key, this.authToken);
+    }
+    getAuthToken(){
+        return this.authToken;
+    }
+
+    private loadSettings (): AppSettings {
         if(!this.isSaveSupported){return defaultSettings;}
         const ls = window.localStorage;
         const key = `${this.appID}:conf`;
@@ -55,6 +67,14 @@ class AppController {
             this.loadFailed = true;
         }
         return defaultSettings;
+    }
+
+    appLoadSettings(){
+        const ls = window.localStorage;
+        const key = `${this.appID}:authToken`;
+        this.authToken = ls.getItem(key) || '';
+        this.conf = this.loadSettings();
+        Lang.gLang.setLang(this.conf.langCode);
     }
 
     logoutUser () {

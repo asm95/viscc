@@ -1,6 +1,7 @@
-import { Vue, Component } from 'vue-property-decorator'
+import { Vue, Component, Watch, Ref } from 'vue-property-decorator'
 
 import MainConfig from '@/components/Config/MainConfig.vue'
+import MainConfigC from '@/components/Config/main'
 import {gLang} from '@/lang'
 import AppM from '@/manage/app'
 
@@ -11,6 +12,8 @@ import AppM from '@/manage/app'
 export default class UserProfile extends Vue {
     userName = 'Named User'
     uiText = gLang.uiText.App.User
+
+    @Ref('config') readonly CConfig!: MainConfigC;
 
     cropUserName(userName: string): string {
         const maxChars = 25;
@@ -29,8 +32,16 @@ export default class UserProfile extends Vue {
         const el = this.$refs['userPicture'];
     }
 
+    @Watch('userName')
+    onNameChanged(nv: string, ov: string){
+        const profile = AppM.conf.userProfile;
+        profile.prettyName = nv;
+        this.CConfig.onConfigChanged();
+    }
+
     constructor (){
         super();
-        this.userName = AppM.conf.userProfile.prettyName;
+        const profile = AppM.conf.userProfile;
+        this.userName = profile.prettyName;
     }
 }

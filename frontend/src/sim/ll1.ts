@@ -426,6 +426,8 @@ export class ParseSimulator {
                 // . can't make any correct suggestions
                 return mkErr(LLParseError.SgErr4, [stackTop.value.repr]);
             }
+            console.log(curToken);
+            console.log(rowEntry);
             const ruleEntry = rowEntry.get(curToken.id);
             if (!ruleEntry){
                 // no entry in the table for symbol and terminal

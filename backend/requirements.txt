@@ -2,3 +2,9 @@
 Flask==1.1.2
 # ORM with sqlalchemy
 SQLAlchemy==1.3.20
+# quick-cli framework
+click==7.1.2
+# encription package
+py-bcrypt==0.4
+# json web token
+PyJWT==1.7.1
