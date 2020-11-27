@@ -372,8 +372,10 @@ export default class Simulator extends Vue {
                 // subsequent boots doesn't need to do that
                 inputStream.push(simGrammar.eofSymbol);
             }
-            inputDisplay = inputStream.map(i => i.repr).join('');
-            this.inputStream = {display: inputDisplay}
+            const tokenStream = inputStream.map(i => i.repr);
+            tokenStream.pop(); // remove '$' for avoid duplicated <eof> symbol
+            inputDisplay = tokenStream.join('');
+            this.inputStream = {display: inputDisplay};
         }
         const stackDisplay = `${simGrammar.eofSymbol.repr} ${simGrammar.startSymbol.repr}`;
         this.questionText = this.uiText.questions.a1(stackDisplay, inputDisplay);

@@ -248,7 +248,7 @@ export class L1Sim {
         this.parseTable = new LL1ParseTable();
         this.symbolByID = new Map<number, Symbl>();
         this.ruleByID = new Map<number, Rule>();
-        this.endOfInputSymbol = {id: g.maxSymbolID++, repr: '$'};
+        this.endOfInputSymbol = g.eofSymbol;
         this.initSymbols();
     }
 }
@@ -345,11 +345,6 @@ export class ParseSimulator {
             return mkErr(LLParseError.StackEmpty, []);
         }
 
-        if (this.inputStreamIndex == this.inputStream.length-1){
-            // end of input-stream reached (the '$' symbol)
-            return mkErr(LLParseError.eofIS, []);
-        }
-
         if (cmd.type == cmdType.REPL){
             // can't use switch case with lexical declarations
             // . more info: https://eslint.org/docs/rules/no-case-declarations
@@ -386,8 +381,12 @@ export class ParseSimulator {
             }
             this.stack.popItem();
             // advance on input stream
-            this.inputStreamIndex++;
+            if (this.inputStreamIndex < this.inputStream.length-1){
+                this.inputStreamIndex++;
+            }
         }
+        // todo: unused error mkErr(LLParseError.eofIS, []);
+
         return mkErr(LLParseError.NoError, []);
     }
 
@@ -426,8 +425,6 @@ export class ParseSimulator {
                 // . can't make any correct suggestions
                 return mkErr(LLParseError.SgErr4, [stackTop.value.repr]);
             }
-            console.log(curToken);
-            console.log(rowEntry);
             const ruleEntry = rowEntry.get(curToken.id);
             if (!ruleEntry){
                 // no entry in the table for symbol and terminal
