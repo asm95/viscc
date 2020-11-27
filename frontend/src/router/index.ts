@@ -27,6 +27,16 @@ const routes: Array<RouteConfig> = [
     path: '/user',
     name: 'User',
     component: () => import(/* webpackChunkName: "user" */ '../views/User.vue')
+  },
+  {
+    path: '/course/list',
+    name: 'CourseList',
+    component: () => import(/* webpackChunkName: "course-list" */ '../views/CourseList.vue')
+  },
+  {
+    path: '/course/go/syntax/sa-ll1-part-one',
+    name: 'CG-Syntax-1',
+    component: () => import(/* webpackChunkName: "cg-syntax-1" */ '../views/courses/LL1/TestView.vue')
   }
 ]
 

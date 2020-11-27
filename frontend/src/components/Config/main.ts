@@ -41,11 +41,6 @@ export default class MainConfig extends Vue {
         window.location.reload();
     }
 
-    onCloseBtnClick(){
-        AppC.saveSettings();
-        this.$emit('close');
-    }
-
     onPrivacyCbToggle(){
         AppC.conf.acceptPrivacy = this.acceptPrivacy;
         this.onConfigChanged();

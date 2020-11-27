@@ -12,6 +12,9 @@
     max-width: 520px;
     margin: 2em auto 0 auto;
   }
+  .boxWrapper {
+    display: inline-block;
+  }
 
   /*icons*/
   .icn.sm{width: 16px; height: 16px;}

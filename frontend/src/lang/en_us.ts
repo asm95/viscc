@@ -135,6 +135,35 @@ const UIText: UITextS = {
         },
         About: {
             textThanks: 'We thank the support by ...'
+        },
+        Courses: {
+            byName: {
+                'sec-lex': {
+                    title: 'Lexical Analysis', tasks: []
+                },
+                'sec-syntax': {
+                    title: 'Syntax Analysis', tasks: []
+                },
+                'introd-syntax-analysis': {
+                    title: 'Introduction', tasks: []
+                },
+                'sa-ll1-part-one': {
+                    title: 'LL(1) Algorithm - Part One',
+                    tasks: [
+                        'Enter and validate a grammar',
+                        'Generate a valid input',
+                        'Simulate and reach accept state'
+                    ]
+                }
+            }
+        },
+        CourseFlow: {
+            lblInfo1: 'You already made through this section. You may begin again',
+            lblInfo2: 'You already made through this section. New attempts cannot be made',
+            btnContinue: 'Continue',
+            btnRestart: 'Restart',
+            btnGB: 'Go Back',
+            lblTitle: 'Course Track'
         }
     }
 }

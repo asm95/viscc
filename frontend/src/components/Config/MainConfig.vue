@@ -1,9 +1,6 @@
 <template>
     <div>
         <div class="content">
-            <div class="ct tar">
-               <CircleFill v-on:click="onCloseBtnClick" class="icn sm anm"  />
-            </div>
             <div class="boxTitle">{{uiText.lblTitle}}</div>
             <div>
                 {{uiText.lblLang}}

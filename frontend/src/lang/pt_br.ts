@@ -136,6 +136,35 @@ const UIText: UITextS = {
         },
         About: {
             textThanks: 'Agradecemos pelo apoio de ...'
+        },
+        Courses: {
+            byName: {
+                'sec-lex': {
+                    title: 'Análise Léxica', tasks: []
+                },
+                'sec-syntax': {
+                    title: 'Análise Sintática', tasks: []
+                },
+                'introd-syntax-analysis': {
+                    title: 'Introdução', tasks: []
+                },
+                'sa-ll1-part-one': {
+                    title: 'Algoritmo LL(1) - Parte 1',
+                    tasks: [
+                        'Escreva e valide a gramática',
+                        'Gere uma entrada válida',
+                        'Simule e chege ao estado de aceitação'
+                    ]
+                }
+            }
+        },
+        CourseFlow: {
+            lblInfo1: 'Você já esteve nesta sessão. Poderá refazê-la se desejar.',
+            lblInfo2: 'Você já esteve nesta sessão. Novas tentativas não poderão ser realizadas',
+            btnContinue: 'Prosseguir',
+            btnRestart: 'Reiniciar',
+            btnGB: 'Voltar',
+            lblTitle: 'Roteiro do Curso'
         }
     }
 }
