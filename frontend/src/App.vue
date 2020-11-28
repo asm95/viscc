@@ -12,6 +12,11 @@
     max-width: 520px;
     margin: 2em auto 0 auto;
   }
+  /* box with no style, just the metrics */
+  .boxNoStyle {
+    max-width: 520px;
+    margin: 2em auto 0 auto;
+  }
   .boxWrapper {
     display: inline-block;
   }

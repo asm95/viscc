@@ -17,7 +17,7 @@ import CourseFlowInfoBox from '@/components/Course/FlowInfo.vue'
 import { InfoBoxSettings, InfoBoxIcon } from '@/components/Course/flowInfo'
 
 import CourseFlowList from '@/components/Course/FlowList.vue'
-import { CourseFlowSettings } from '@/components/Course/flowList'
+import { CourseFlowSettings, CourseItemView } from '@/components/Course/flowList'
 
 import AppC from '@/manage/app'
 
@@ -30,10 +30,12 @@ interface BoxState {
 const tvBoxStates: {[key: string]: BoxState} = {
   config: {isVisible: false, isClosable: true},
   courseProgress: {isVisible: true, isClosable: false},
+  courseInfo: {isVisible: false, isClosable: false},
+  courseEndedActions: {isVisible: false, isClosable: false}
 };
 const tvCFConfig: InfoBoxSettings = {
   icon: InfoBoxIcon.warning,
-  textID: 'lblInfo2',
+  text: '',
   canResume: false,
   canRestart: false,
   canGoBack: true,
@@ -43,6 +45,80 @@ const tvFLConfig: CourseFlowSettings = {
   progress: 0,
   courseItems: []
 };
+const tvViewStates: {[key: string]: boolean} = {
+  BtnACReview: false,
+  ActivityBox: true
+}
+
+// course flow manager
+// . easier interface for setting progress
+
+enum CourseFlowState {
+  notStarted, inProgress, finished
+}
+
+interface CourseFlowItem {
+  id: string;
+  index?: string;
+  displayTitle: string;
+  state: CourseFlowState;
+}
+
+class CourseFlowManager {
+  flowSettings: CourseFlowSettings;
+  onActivityComplatedCallback?: () => void;
+  private flowData: CourseItemView[];
+  private flowByID: Map<string, CourseFlowItem>;
+  private finishedCount = 0;
+
+  setState(id: string, state: CourseFlowState){
+    const e = this.flowByID.get(id);
+    if (!e || e.state == state){return;}
+    if (state == CourseFlowState.finished){
+      const idx = parseInt(e.index || '0');
+      this.flowData[idx].isActive = true;
+      this.finishedCount++;
+    } else {
+      this.finishedCount--;
+    }
+    this.updateFlowProgress();
+    e.state = state;
+  }
+
+  private updateFlowProgress(){
+    const progress = this.finishedCount / this.flowData.length;
+    this.flowSettings.progress = progress;
+    if (progress == 1){
+      if (this.onActivityComplatedCallback){
+        this.onActivityComplatedCallback();
+      }
+    }
+  }
+
+  setFlowData(flowData: CourseFlowItem[]){
+    for (const idx in flowData){
+      const e = flowData[idx];
+      e.index = idx;
+      this.flowByID.set(e.id, e);
+      const isFinished = (e.state == CourseFlowState.finished);
+      if (isFinished){
+        this.finishedCount++;
+      }
+      this.flowData.push({
+        display: e.displayTitle, isActive: isFinished
+      });
+    }
+    this.updateFlowProgress();
+  }
+
+  constructor(flowConfig: CourseFlowSettings){
+    this.flowData = [];
+    this.flowByID = new Map<string, CourseFlowItem>();
+    flowConfig.courseItems = this.flowData;
+    this.flowSettings = flowConfig;
+    this.onActivityComplatedCallback = undefined;
+  }
+}
 
 @Component({
   components: {
@@ -63,10 +139,11 @@ export default class TestView extends Vue {
   uiText = lang.gLang.uiText.LLView;
   cfText = lang.gLang.uiText.App.CourseFlow;
 
-  isSimulatorDisabled = true;
+  isSimulatorDisabled = false;
   boxStates = tvBoxStates;
   configCF = tvCFConfig;
-  configFL = tvFLConfig;
+  viewState = tvViewStates;
+  flowManager: CourseFlowManager;
 
   onEditorGrammarSet (g: Grammar){
     this.grammar = g;
@@ -80,6 +157,8 @@ export default class TestView extends Vue {
     // let the user type an input for the simulator
     this.inputString = '';
     this.simulatorEnabled = true;
+    // let the course activity tracker know that we made progress
+    this.flowManager.setState('enter-grammar', CourseFlowState.finished);
   }
 
   onInfoRefresh(info: L1Sim){
@@ -107,6 +186,8 @@ export default class TestView extends Vue {
     const sim = new ParseSimulator(inputStream, this.grammar);
     sim.pareseTable = this.parseTable;
     this.parseSimulator = sim;
+    // let the course activity tracker know we compleated this task
+    this.flowManager.setState('gen-input', CourseFlowState.finished);
   }
 
   onLanguageSet(){
@@ -146,13 +227,47 @@ export default class TestView extends Vue {
   }
 
   private onInitCourseFlow(){
-    this.configFL.progress = 33.3;
-    const courseItems = this.configFL.courseItems;
-    const compCI = [true, false, false];
     const textCI = lang.gLang.uiText.App.Courses.byName['sa-ll1-part-one'].tasks as string[];
-    for (let idx = 0; idx < 3; idx++){
-      courseItems.push({display: textCI[idx], isActive: compCI[idx]});
+    const fState = CourseFlowState;
+    this.flowManager.setFlowData([
+      {id: 'enter-grammar', displayTitle: textCI[0], state: fState.notStarted},
+      {id: 'gen-input', displayTitle: textCI[1], state: fState.notStarted},
+      {id: 'sim-ended', displayTitle: textCI[2], state: fState.notStarted},
+    ]);
+    this.flowManager.onActivityComplatedCallback = this.onActivityTaskComplated;
+
+    // reset activity state
+    this.viewState.ActivityBox = true;
+    this.boxStates.courseEndedActions.isVisible = false;
+  }
+
+  setActivityState(state: string){
+    if (state == 'ended'){
+      const cfText = this.cfText;
+      this.configCF.text = `${cfText.lblInfo2}. ${cfText.lblReason}: ${cfText.lblInfo3}.`;
+      this.boxStates.courseInfo.isVisible = true;
     }
+  }
+
+  onACQuitBtnClick(){
+    Router.back();
+  }
+  onACReviewBtnClick(){
+    this.viewState.ActivityBox = false;
+    this.viewState.BtnACReview = false;
+  }
+
+  onSimulatorStateChange(state: string){
+    // when the simulator raches some state
+    if (state == 'done'){
+      this.flowManager.setState('sim-ended', CourseFlowState.finished);
+    }
+  }
+
+  onActivityTaskComplated(){
+    // callback when the activity detected all tasks were done
+    this.viewState.BtnACReview = true;
+    this.boxStates.courseEndedActions.isVisible = true;
   }
 
   mounted(){
@@ -165,5 +280,6 @@ export default class TestView extends Vue {
     this.parseSimulator = new ParseSimulator([], this.grammar);
     this.simSettings = {showSuggestions: true, showLines: true, optMoboVer: false};
     this.tokensMap = new Map<string, Symbl>();
+    this.flowManager = new CourseFlowManager(tvFLConfig);
   }
 }

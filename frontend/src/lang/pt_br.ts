@@ -151,7 +151,7 @@ const UIText: UITextS = {
                 'sa-ll1-part-one': {
                     title: 'Algoritmo LL(1) - Parte 1',
                     tasks: [
-                        'Escreva e valide a gramática',
+                        'Escreva e valide uma gramática',
                         'Gere uma entrada válida',
                         'Simule e chege ao estado de aceitação'
                     ]
@@ -159,12 +159,16 @@ const UIText: UITextS = {
             }
         },
         CourseFlow: {
-            lblInfo1: 'Você já esteve nesta sessão. Poderá refazê-la se desejar.',
+            lblInfo1: 'Você já esteve nesta sessão. Poderá refazê-la se desejar',
             lblInfo2: 'Você já esteve nesta sessão. Novas tentativas não poderão ser realizadas',
+            lblInfo3: 'a atividade foi encerrada',
+            lblReason: 'Motivo',
             btnContinue: 'Prosseguir',
             btnRestart: 'Reiniciar',
+            btnReview: 'Revisar',
+            btnQuit: 'Sair',
             btnGB: 'Voltar',
-            lblTitle: 'Roteiro do Curso'
+            lblTitle: 'Roteiro da Atividade',
         }
     }
 }

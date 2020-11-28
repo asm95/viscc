@@ -182,6 +182,7 @@ export default class Simulator extends Vue {
         if (stackIsEmpty && istrIsComsumed){
             // we reached the accept state with empty stack
             state = ObjectState.isDone;
+            this.$emit('onState', 'done');
         }
         else if (nextCmd.hasError == LLParseError.SgErr1){
             // we don't have our LL(1) parse table to help, so we have test some

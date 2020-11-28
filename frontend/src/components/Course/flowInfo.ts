@@ -9,7 +9,7 @@ export enum InfoBoxIcon {
 
 export interface InfoBoxSettings {
     icon: InfoBoxIcon;
-    textID: string;
+    text: string;
     canResume: boolean;
     canRestart: boolean;
     canGoBack: boolean;

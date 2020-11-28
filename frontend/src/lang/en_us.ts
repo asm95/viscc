@@ -150,7 +150,7 @@ const UIText: UITextS = {
                 'sa-ll1-part-one': {
                     title: 'LL(1) Algorithm - Part One',
                     tasks: [
-                        'Enter and validate a grammar',
+                        'Enter and validate one grammar',
                         'Generate a valid input',
                         'Simulate and reach accept state'
                     ]
@@ -160,10 +160,14 @@ const UIText: UITextS = {
         CourseFlow: {
             lblInfo1: 'You already made through this section. You may begin again',
             lblInfo2: 'You already made through this section. New attempts cannot be made',
+            lblInfo3: 'this activity was ended',
+            lblReason: 'Reason',
             btnContinue: 'Continue',
             btnRestart: 'Restart',
+            btnReview: 'Review',
+            btnQuit: 'Exit',
             btnGB: 'Go Back',
-            lblTitle: 'Course Track'
+            lblTitle: 'Acitivty Tracker'
         }
     }
 }

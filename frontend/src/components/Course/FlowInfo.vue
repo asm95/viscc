@@ -2,7 +2,7 @@
     <div>
         <p>
             <span v-if="conf.icon == infoIconTypes.warning">⚠️</span>
-            {{uiText[conf.textID]}}
+            {{conf.text}}
         </p>
         <div class="tar boxRestartCourseOpts">
             <button v-if="conf.canResume" @click="onBtnContinueClick" class="button is-info mr">{{uiText.btnContinue}}</button>
