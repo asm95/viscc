@@ -32,7 +32,7 @@
         <div class="title">{{uiText.lblSimulator}}</div>
         <p v-if="errMsg" class="errMsg">{{errMsg}}</p>
         <input type="text" placeholder="input stream" @change="onInputSet" :disabled="! simulatorEnabled" v-model="inputString" class="input">
-        <LL1Sim @onState="onSimulatorStateChange" :conf="simSettings" :simulator="parseSimulator"/>
+        <LL1Sim @onState="onSimulatorStateChange" :conf="simSettings" :simulator="parseSimulator" ref="SimulatorC"/>
       </div>
       <Tree/>
     </div>

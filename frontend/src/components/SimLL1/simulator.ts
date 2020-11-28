@@ -1,4 +1,4 @@
-import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
+import { Component, Vue, Prop, Watch, Ref } from 'vue-property-decorator'
 import { PropType } from 'vue'
 
 import { LLSimInputCommand, LLParseError, cmdType, ParseSimulator, RenderResponseMessage, Rule, itemType, Symbl } from '@/sim/ll1'
@@ -105,6 +105,8 @@ export default class Simulator extends Vue {
 
     @Prop({type: Object as PropType<Settings>, default: DefaultSettings}) readonly conf!: Settings;
     @Prop({type: ParseSimulator}) readonly simulator!: ParseSimulator;
+    @Ref('inputCommand') readonly inputCommandElement!: HTMLInputElement;
+    @Ref('commandBoxBottom') readonly inputCommandBottom!: HTMLElement;
 
     uiText: any;
     stackContent: LLSimStackItemView[];
@@ -162,6 +164,19 @@ export default class Simulator extends Vue {
 
     setInputEnabled(toggle: boolean){
         this.inputDisabled = ! toggle;
+    }
+
+    focusOnInput(scroll: boolean, focus: boolean){
+        this.$nextTick(() => {
+            // todo: check compatibility in
+            // . https://developer.mozilla.org/pl/docs/Web/API/Element/scrollIntoView#Browser_compatibility
+            if (scroll){
+                this.inputCommandBottom.scrollIntoView();
+            }
+            if (focus){
+                this.inputCommandElement.focus();
+            }
+        });
     }
 
     updateValidState(): Response {
@@ -284,7 +299,7 @@ export default class Simulator extends Vue {
         // . more info: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode
         if (ev.keyCode != 13){return;}
         const userInput = this.curInput;
-        const sim = this.simulator;
+        if (userInput == ""){return;}
         const cmd = parseCommand(userInput);
         const token = this.simulator.getCurrentToken();
         let simEnded = false;
@@ -311,6 +326,7 @@ export default class Simulator extends Vue {
                     // successful command
                     // add to command history
                     this.commandHistory.push(this.displayCommand(cmd, token));
+                    this.$emit('onState', 'onCommandExecuted');
                     // we have to update entire UI if some special
                     // . condition has reached
                     const status = this.updateValidState();

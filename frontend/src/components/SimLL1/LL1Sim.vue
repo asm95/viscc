@@ -40,7 +40,7 @@
         <div>
             <p>{{uiText.lblCmd}}</p>
             <p v-if="errMsg.inputCommand" v-html="errMsg.inputCommand.display" class="tc err"></p>
-            <input @keyup="onUserInputCommand" v-model="curInput" :maxlength="inputMaxLength" :disabled="inputDisabled" type="text" name="" class="input c">
+            <input @keyup="onUserInputCommand" v-model="curInput" :maxlength="inputMaxLength" :disabled="inputDisabled" type="text" ref="inputCommand" class="input c">
             <div v-if="errMsg.fatalState">
                 <p v-html="errMsg.fatalState"></p>
                 <div class="btnRestart">
@@ -52,6 +52,7 @@
             <div v-if="userStatus">
                 <p v-html="userStatus.display"></p>
             </div>
+            <div ref="commandBoxBottom"></div>
         </div>
     </div>
 </template>

@@ -1,7 +1,8 @@
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Ref } from 'vue-property-decorator';
 import GEditor from '@/components/GramEditor/GramEditor.vue';
 import LL1Info from '@/components/SimLL1/LL1Info.vue';
 import LL1Sim from '@/components/SimLL1/LL1Sim.vue';
+import LL1SimC from '@/components/SimLL1/simulator';
 import MainConfig from '@/components/Config/MainConfig.vue';
 
 import Tree from '@/components/Graph/tree';
@@ -145,6 +146,8 @@ export default class TestView extends Vue {
   viewState = tvViewStates;
   flowManager: CourseFlowManager;
 
+  @Ref('SimulatorC') readonly SimulatorC!: LL1SimC;
+
   onEditorGrammarSet (g: Grammar){
     this.grammar = g;
     // build own internal meta-info of grammar
@@ -186,6 +189,8 @@ export default class TestView extends Vue {
     const sim = new ParseSimulator(inputStream, this.grammar);
     sim.pareseTable = this.parseTable;
     this.parseSimulator = sim;
+    // scroll into input directly
+    this.SimulatorC.focusOnInput(true, true);
     // let the course activity tracker know we compleated this task
     this.flowManager.setState('gen-input', CourseFlowState.finished);
   }
@@ -261,6 +266,10 @@ export default class TestView extends Vue {
     // when the simulator raches some state
     if (state == 'done'){
       this.flowManager.setState('sim-ended', CourseFlowState.finished);
+    } else if (state == 'onCommandExecuted'){
+      // when the user successfully enter a valid command and the simulator executes it
+      // . we have to adjust the scroll so the user can still type on it
+      this.SimulatorC.focusOnInput(true, false);
     }
   }
 
