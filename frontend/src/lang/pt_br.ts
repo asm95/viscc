@@ -138,9 +138,16 @@ const UIText: UITextS = {
             textThanks: 'Agradecemos pelo apoio de ...'
         },
         Courses: {
+            title: 'Tradutores',
             byName: {
                 'sec-lex': {
                     title: 'Análise Léxica', tasks: []
+                },
+                'introd-lex-analysis': {
+                    title: 'Introdução', tasks: []
+                },
+                'la-nfa2dfa': {
+                    title: 'AFND para AFD', tasks: []
                 },
                 'sec-syntax': {
                     title: 'Análise Sintática', tasks: []
@@ -153,10 +160,19 @@ const UIText: UITextS = {
                     tasks: [
                         'Escreva e valide uma gramática',
                         'Gere uma entrada válida',
-                        'Simule e chege ao estado de aceitação'
+                        'Simule e chegue ao estado de aceitação'
                     ]
                 }
             }
+        },
+        CourseList: {
+            btnView: 'Visualizar',
+            lblCompleteStatus: (c: int) => `${c}% Concluído`,
+            lblRating: (r: int) => {
+                if (r >= 0){return `${r} estrelas de reputação`;}
+                return `Nenhuma avaliação`;
+            },
+            lblNA: 'N/D'
         },
         CourseFlow: {
             lblInfo1: 'Você já esteve nesta sessão. Poderá refazê-la se desejar',

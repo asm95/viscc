@@ -137,9 +137,16 @@ const UIText: UITextS = {
             textThanks: 'We thank the support by ...'
         },
         Courses: {
+            title: 'Translators',
             byName: {
                 'sec-lex': {
                     title: 'Lexical Analysis', tasks: []
+                },
+                'introd-lex-analysis': {
+                    title: 'Introduction', tasks: []
+                },
+                'la-nfa2dfa': {
+                    title: 'NFA 2 DFA', tasks: []
                 },
                 'sec-syntax': {
                     title: 'Syntax Analysis', tasks: []
@@ -156,6 +163,15 @@ const UIText: UITextS = {
                     ]
                 }
             }
+        },
+        CourseList: {
+            btnView: 'View',
+            lblCompleteStatus: (c: int) => `${c}% Complete`,
+            lblRating: (r: int) => {
+                if (r >= 0){return `${r} stars rating`;}
+                return `No rating`;
+            },
+            lblNA: 'N/A'
         },
         CourseFlow: {
             lblInfo1: 'You already made through this section. You may begin again',

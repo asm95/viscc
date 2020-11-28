@@ -9,6 +9,7 @@ interface CourseItem {
     rating: number;
     pctCompleted?: number;
     routerTo: string;
+    isAvailable: boolean;
 }
 
 interface CourseCategory {
@@ -17,22 +18,28 @@ interface CourseCategory {
 }
 
 const courseItems: CourseCategory[] = [
-    {name: 'sec-lex', items: []},
+    {name: 'sec-lex', items: [
+        {slug: 'introd-lex-analysis', author: 'VisCC', rating: 5, routerTo: 'About', isAvailable: false},
+        {slug: 'la-nfa2dfa', author: 'VisCC', rating: -1, routerTo: 'About', isAvailable: false},
+    ]},
     {name: 'sec-syntax', items: [
-        {slug: 'introd-syntax-analysis', author: 'Cristiano', rating: 3, routerTo: 'About'},
-        {slug: 'sa-ll1-part-one', author: 'VisCC', rating: 5, routerTo: 'CG-Syntax-1'}
+        {slug: 'introd-syntax-analysis', author: 'Cristiano', rating: 3, routerTo: 'About', isAvailable: false},
+        {slug: 'sa-ll1-part-one', author: 'VisCC', rating: 5, routerTo: 'CG-Syntax-1', isAvailable: true}
     ]},
 ];
 
 @Component({})
 export default class CourseList extends Vue {
     courseItemDisplay: CourseCategory[] = [];
-    uiText = gLang.uiText.App.Courses;
+    uiText = gLang.uiText.App.CourseList;
+    courseTitle = 'Course Title';
 
     updateCourseCategory(cItems: CourseCategory[]){
+        const text = gLang.uiText.App.Courses;
         this.courseItemDisplay = [];
+        this.courseTitle = text.title;
         const displayItems =  this.courseItemDisplay;
-        const displayText = this.uiText.byName;
+        const displayText = text.byName;
         for (const item of cItems){
             const courseDT = displayText[item.name];
             displayItems.push({
