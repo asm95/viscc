@@ -19,7 +19,6 @@
       <div class="ct tar">
         <Gear @click="onConfigBtnClick" class="icn sm anm" />
       </div>
-      <img alt="Vue logo" src="@/assets/logo.png" width="32px">
       <div>
         <div class="title">{{uiText.lblGramEditor}}</div>
         <GEditor @onGrammarSet="onEditorGrammarSet" />

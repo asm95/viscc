@@ -1,6 +1,5 @@
 from typing import Any
-from datetime import datetime as dt, timedelta
-
+import json
 
 from flask import request, jsonify
 
@@ -9,6 +8,7 @@ from common.util import unpack
 from models.user import (
     UserSettings, usr_get_from_creds, usr_bake_token, usr_check_token, usr_unpack_prefs, usr_save_prefs
 )
+from models.telemetry import log_telemetry_data
 
 
 class Response(object):
@@ -25,8 +25,9 @@ class Response(object):
         return dict(ok=self.ok, msg=self.msg, data=out_data)
 
 
-def get_json_contents(schema: dict) -> Response:
+def get_json_contents(schema: dict, data: dict = None) -> Response:
     in_json = request.json or dict()
+    if data: in_json = data
     parsed = dict()
     if in_json is None and schema:
         return Response(ok=False, msg='empty request')
@@ -41,6 +42,10 @@ def get_json_contents(schema: dict) -> Response:
                 parsed[k] = int(value)
             elif v_type == 'float':
                 parsed[k] = float(value)
+            elif v_type == 'dict':
+                parsed[k] = json.loads(value, encoding='utf-8')
+            elif v_type == 'any':
+                parsed[k] = value
             else:
                 parsed[k] = str(value)
         except (Exception, ) as e:
@@ -122,3 +127,24 @@ class UserAPI(ApiView):
 
     def __init__(self, ):
         self.cookies = View.Cookies(self)
+
+
+class TelemetryAPI(ApiView):
+    """
+    manages telemetry data sent from clients
+    """
+    name = 'UserAPI'
+    mount = '/api/dog'
+
+    @View.route('/push', method='post')
+    @require_login
+    def rt_collect_push(self, token_data: dict):
+        in_data = get_json_contents(schema={
+            'cid': dict(req=True, t='int'), 'd': dict(req=True, t='any')
+        }, data=request.json['data'])
+        user_id = int(token_data.get('uid', '-1'))
+        if not in_data.ok:
+            return self.api_res(Response(ok=False, msg='invalid data'))
+        content_id, log_data = unpack(in_data.data, ('cid', 'd'))
+        log_telemetry_data(user_id, content_id, log_data)
+        return self.api_res(Response())

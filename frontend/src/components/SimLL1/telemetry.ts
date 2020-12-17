@@ -1,3 +1,6 @@
+import {TelemetryA as ApiTelemetry} from '@/manage/api'
+
+
 interface ContextSettings {
     userID: number;
     contentID: number;
@@ -64,17 +67,14 @@ export default class ComponentTelemetry {
     doSendRemote = false;
     commandHistory: string[];
     contextSettings: ContextSettings;
-    backend: Backend;
+    backend: ApiTelemetry;
 
     pushHistory(cmdHistory: string[]){
         // data packet
         // t is the payload id; t = 0 is a command history
         // c is the content itself
         const cs = this.contextSettings;
-        const payload = {
-            uid: cs.userID, id: cs.contentID, t: 0, c: cmdHistory
-         };
-         
+        this.backend.pushHistory(cs.contentID, cmdHistory, () => {return;});
     }
 
     logCommand(cmd: string){
@@ -102,6 +102,6 @@ export default class ComponentTelemetry {
     constructor(){
         this.contextSettings = {userID: 0, contentID: 0};
         this.commandHistory = [];
-        this.backend = new Backend();
+        this.backend = new ApiTelemetry();
     }
 }

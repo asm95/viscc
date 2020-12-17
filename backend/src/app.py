@@ -6,7 +6,7 @@ from common.flask import (
 from common.util import lapply
 from common.globals import G_ENV
 
-from api.main import UserAPI
+from api.main import UserAPI, TelemetryAPI
 
 app = Flask(
     # app is bound to script name
@@ -36,6 +36,7 @@ def bootstrap_app():
         app_register_routes,
         [
             wapp.get_views(),
+            TelemetryAPI().get_views(),
             # more views can be injected here
         ], func_args=app
     )

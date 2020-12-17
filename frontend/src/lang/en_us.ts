@@ -183,7 +183,7 @@ const UIText: UITextS = {
             btnReview: 'Review',
             btnQuit: 'Exit',
             btnGB: 'Go Back',
-            lblTitle: 'Acitivty Tracker'
+            lblTitle: 'Activity Tracker'
         }
     }
 }

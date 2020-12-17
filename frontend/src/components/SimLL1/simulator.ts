@@ -3,9 +3,10 @@ import { PropType } from 'vue'
 
 import { LLSimInputCommand, LLParseError, cmdType, ParseSimulator, RenderResponseMessage, Rule, itemType, Symbl } from '@/sim/ll1'
 import ComponentTelemetry from './telemetry'
-import lang from '@/lang';
+import AppM from '@/manage/app'
+import lang from '@/lang'
 
-import icons from '@/components/icons';
+import icons from '@/components/icons'
 
 export interface Settings {
     showSuggestions: boolean;
@@ -420,9 +421,18 @@ export default class Simulator extends Vue {
         this.setInputEnabled(canEnableInput);
     }
 
+    private setupTelemetry(){
+        const isSendDataAllowed = AppM.conf.acceptPrivacy;
+        this.telemetry.dog.doSendRemote = isSendDataAllowed;
+    }
+
     @Watch('simulator')
     onSimulatorSet(nV: ParseSimulator, oV: ParseSimulator){
         this.onReset(true);
+    }
+
+    mounted () {
+        this.setupTelemetry();
     }
 
     constructor(){

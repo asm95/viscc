@@ -23,7 +23,7 @@ const courseItems: CourseCategory[] = [
         {slug: 'la-nfa2dfa', author: 'VisCC', rating: -1, routerTo: 'About', isAvailable: false},
     ]},
     {name: 'sec-syntax', items: [
-        {slug: 'introd-syntax-analysis', author: 'Cristiano', rating: 3, routerTo: 'About', isAvailable: false},
+        {slug: 'introd-syntax-analysis', author: 'Cristiano', rating: 3, routerTo: 'About', isAvailable: true},
         {slug: 'sa-ll1-part-one', author: 'VisCC', rating: 5, routerTo: 'CG-Syntax-1', isAvailable: true}
     ]},
 ];

@@ -53,3 +53,15 @@ export class UserA {
         });
     }
 }
+
+export class TelemetryA {
+    pushHistory (contentID: number, data: string[], cb: APICallback){
+        apiIns.post(`${baseRoute}/dog/push`, {
+            data: {cid: contentID, d: data},
+            authToken: AppM.getAuthToken()
+        }).then((r) => {
+            const d = r.data as APIResponse;
+            cb(d);
+        });
+    }
+}
